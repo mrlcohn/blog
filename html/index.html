@@ -52,12 +52,12 @@
       <li>DevOps</li>
       <ul>
         <li>Use as many AWS tools as possible</li>
-        <li>Implement Infrastructure-as-Code</li>
+        <li>Implement Infrastructure-as-Code (IaC)</li>
         <ul>
           <li>Terraform</li>
           <li>AWS CloudFormation</li>
         </ul>
-        <li>Implement Configuration-as-Code</li>
+        <li>Implement Configuration-as-Code (CaC)</li>
         <ul>
           <li>Ansible</li>
           <li>Chef</li>
@@ -81,12 +81,21 @@
       expand on these concepts. I plan to write at least one post as I
       implement each of these concepts.
     </p>
-    <h2>First steps - GitHub, index.html, and AWS</h2>
+    <h2>First steps - GitHub</h2>
     <p>
       I started by creating a new GitHub repository. You can find it
       <a href="https://github.com/mrlcohn/blog">here</a>! It is pretty bare
       right now, but I will be improving on it with multiple changes as I build
       this project. Right now, it looks like this:
     </p>
-    <img src="../images/blog01/github." alt="The GitHub Repository" />
+    <img src="../images/blog01/github.png" alt="The GitHub Repository" />
+    <p>
+      I have not yet decided on how I want to host this project in AWS. I will
+      start by configuring a database and using an Express.js instance to reach
+      it. Once both of those are hosted in AWS, I will start integrating DevOps
+      by implementing some IaC. Once that is all done, I can see whether it
+      will be better to start working on a frontend or continue implementing
+      DevOps into my project. After all, a boring HTML blog page does get
+      pretty sad to look at after a while!
+    </p>
   </body>
