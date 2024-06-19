@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <h1>Getting started with the blog - foundations and goals</h1>
+    <h2>Leonard Cohn</h2>
+    <h2>June 11, 2024</h2>
+    <hr />
+    <h2>Welcome to my very first blog post!</h2>
+    <p>
+      My name is Leonard. I am a DevOps engineer who wants to build projects to
+      develop my skills and learn more about the technologies I use at work and
+      those that are popular in the industry.
+    </p>
+    <p>
+      In my current position, my team uses the MERN stack, and I sometimes feel
+      intimidated by the codebase. I want to learn more about building and
+      deploying this stack so I can jump in and learn more about the products I
+      am supporting. We use AWS for some of our development and QA deployments,
+      but our production deployments are bare-metal. I want to explore AWS
+      more.
+    </p>
+    <p>
+      For my first project, I am going to set up a blog that I can use to
+      document my projects and hone my DevOps skills. The blog will involve the
+      following components:
+    </p>
+    <ol>
+      <li>MongoDB</li>
+      <ul>
+        <li>Deploy</li>
+        <ul>
+          <li>AWS DocumentDB</li>
+          <li>AWS MongoDB Atlas integration</li>
+          <li>Self-hosted DB hosted on AWS infrastructure</li>
+        </ul>
+        <li>Document structure of blog posts and users</li>
+        <li>CRUD operations for blog posts</li>
+      </ul>
+      <li>Express.js</li>
+      <ul>
+        <li>API to fetch data from database</li>
+        <li>Authorization and authentication</li>
+      </ul>
+      <li>React.js</li>
+      <ul>
+        <li>Routing to homepage, login, upload, and blog post pages</li>
+        <li>Integration of Material UI components</li>
+        <li>Basic style (CSS) configurations</li>
+        <li>Vite.js (used by my current employer)</li>
+      </ul>
+      <li>Node.js</li>
+      <li>DevOps</li>
+      <ul>
+        <li>Use as many AWS tools as possible</li>
+        <li>Implement Infrastructure-as-Code (IaC)</li>
+        <ul>
+          <li>Terraform</li>
+          <li>AWS CloudFormation</li>
+        </ul>
+        <li>Implement Configuration-as-Code (CaC)</li>
+        <ul>
+          <li>Ansible</li>
+          <li>Chef</li>
+          <li>Puppet</li>
+          <li>AWS</li>
+        </ul>
+        <li>CI/CD pipeline management</li>
+        <ul>
+          <li>AWS tools</li>
+          <li>Jenkins server</li>
+        </ul>
+        <li>Test integration</li>
+        <li>Hosting through Docker and AWS ECS or EKS</li>
+        <li>Branching strategy and GitHub repository</li>
+      </ul>
+    </ol>
+    <p>
+      That list is fairly long but doable. I wanted to get the major goals out
+      in the open so that I do not encounter too much scope creep right away.
+      I have other projects in my head that I also want to tackle that will
+      expand on these concepts. I plan to write at least one post as I
+      implement each of these concepts.
+    </p>
+    <h2>First steps - GitHub</h2>
+    <p>
+      I started by creating a new GitHub repository. You can find it
+      <a href="https://github.com/mrlcohn/blog">here</a>! It is pretty bare
+      right now, but I will be improving on it with multiple changes as I build
+      this project. Right now, it looks like this:
+    </p>
+    <img src="../../images/blog01/github.png" alt="The GitHub repository" />
+    <p>
+      I have not yet decided on how I want to host this project in AWS. I will
+      start by configuring a database and using an Express.js instance to reach
+      it. Once both of those are hosted in AWS, I will start integrating DevOps
+      by implementing some IaC. Once that is all done, I can see whether it
+      will be better to start working on a frontend or continue implementing
+      DevOps into my project. After all, a boring HTML blog page does get
+      pretty sad to look at after a while!
+    </p>
+    <img src="../../images/blog01/blog.png" alt="My boring blog" />
+  </body>
