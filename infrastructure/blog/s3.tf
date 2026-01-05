@@ -39,6 +39,9 @@ resource "aws_s3_bucket_public_access_block" "blog" {
 resource "aws_s3_bucket_policy" "blog" {
   bucket = aws_s3_bucket.blog.id
 
+  # Ensure public access block is configured first
+  depends_on = [aws_s3_bucket_public_access_block.blog]
+
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [

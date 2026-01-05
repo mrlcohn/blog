@@ -73,28 +73,66 @@ resource "aws_iam_policy" "terraform_state_access" {
   })
 }
 
-# Policy for S3 blog bucket management
-resource "aws_iam_policy" "blog_deployment" {
-  name        = "BlogDeploymentPolicy"
-  description = "Allows GitHub Actions to deploy blog to S3"
+# Policy for Terraform to manage S3 blog bucket resources
+resource "aws_iam_policy" "blog_terraform" {
+  name        = "BlogTerraformPolicy"
+  description = "Allows Terraform to manage blog S3 bucket infrastructure"
 
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
+        Sid    = "ManageBlogBucket"
         Effect = "Allow"
         Action = [
           "s3:CreateBucket",
           "s3:DeleteBucket",
+          "s3:ListBucket",
+          "s3:GetBucketLocation",
+          "s3:PutBucketWebsite",
+          "s3:GetBucketWebsite",
+          "s3:DeleteBucketWebsite",
+          "s3:PutBucketPolicy",
+          "s3:GetBucketPolicy",
+          "s3:DeleteBucketPolicy",
+          "s3:PutBucketPublicAccessBlock",
+          "s3:GetBucketPublicAccessBlock",
+          "s3:PutBucketVersioning",
+          "s3:GetBucketVersioning",
+          "s3:GetBucketAcl",
+          "s3:GetBucketTagging",
+          "s3:PutBucketTagging",
+          "s3:GetBucketCORS",
+          "s3:GetAccelerateConfiguration",
+          "s3:GetBucketRequestPayment",
+          "s3:GetBucketLogging",
+          "s3:GetLifecycleConfiguration",
+          "s3:GetReplicationConfiguration",
+          "s3:GetEncryptionConfiguration",
+          "s3:GetBucketObjectLockConfiguration"
+        ]
+        Resource = "arn:aws:s3:::${var.blog_bucket_name}"
+      }
+    ]
+  })
+}
+
+# Policy for deploying blog content to S3
+resource "aws_iam_policy" "blog_deployment" {
+  name        = "BlogDeploymentPolicy"
+  description = "Allows GitHub Actions to deploy blog content to S3"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "DeployBlogContent"
+        Effect = "Allow"
+        Action = [
           "s3:PutObject",
           "s3:GetObject",
           "s3:DeleteObject",
-          "s3:ListBucket",
-          "s3:PutBucketWebsite",
-          "s3:PutBucketPolicy",
-          "s3:PutBucketPublicAccessBlock",
-          "s3:GetBucketPolicy",
-          "s3:PutBucketCORS"
+          "s3:ListBucket"
         ]
         Resource = [
           "arn:aws:s3:::${var.blog_bucket_name}",
@@ -109,6 +147,11 @@ resource "aws_iam_policy" "blog_deployment" {
 resource "aws_iam_role_policy_attachment" "terraform_state" {
   role       = aws_iam_role.github_actions.name
   policy_arn = aws_iam_policy.terraform_state_access.arn
+}
+
+resource "aws_iam_role_policy_attachment" "blog_terraform" {
+  role       = aws_iam_role.github_actions.name
+  policy_arn = aws_iam_policy.blog_terraform.arn
 }
 
 resource "aws_iam_role_policy_attachment" "blog_deployment" {
