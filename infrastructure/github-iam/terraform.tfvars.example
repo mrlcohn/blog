@@ -1,0 +1,5 @@
+aws_region                 = "us-east-1"
+github_repo                = "YOUR_USERNAME/blog"
+terraform_state_bucket_arn = "arn:aws:s3:::your-terraform-state-bucket"
+terraform_lock_table_arn   = "arn:aws:dynamodb:us-east-1:YOUR_ACCOUNT_ID:table/terraform-lock-table"
+blog_bucket_name           = "my-blog-website"

@@ -1,0 +1,7 @@
+# Backend configuration for local development
+# Copy this to backend-config.hcl and fill in your values
+# backend-config.hcl is gitignored
+
+bucket         = "your-terraform-state-bucket"
+region         = "us-east-1"
+dynamodb_table = "terraform-lock-table"
