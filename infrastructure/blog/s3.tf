@@ -1,24 +1,70 @@
 # S3 bucket for blog hosting
-# Placeholder - add actual S3 configuration when ready
+resource "aws_s3_bucket" "blog" {
+  bucket = var.blog_bucket_name
+}
 
-# Example (commented out):
-# resource "aws_s3_bucket" "blog" {
-#   bucket = var.blog_bucket_name
-# }
-#
-# resource "aws_s3_bucket_website_configuration" "blog" {
-#   bucket = aws_s3_bucket.blog.id
-#
-#   index_document {
-#     suffix = "index.html"
-#   }
-#
-#   error_document {
-#     key = "index.html"
-#   }
-# }
+# Enable versioning for the bucket
+resource "aws_s3_bucket_versioning" "blog" {
+  bucket = aws_s3_bucket.blog.id
 
-# Placeholder output
-output "info" {
-  value = "Blog infrastructure will be added here (S3, CloudFront, Route53, etc.)"
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+# Configure static website hosting
+resource "aws_s3_bucket_website_configuration" "blog" {
+  bucket = aws_s3_bucket.blog.id
+
+  index_document {
+    suffix = "index.html"
+  }
+
+  error_document {
+    key = "index.html"
+  }
+}
+
+# Allow public access for website hosting (will restrict to CloudFront later)
+resource "aws_s3_bucket_public_access_block" "blog" {
+  bucket = aws_s3_bucket.blog.id
+
+  block_public_acls       = false
+  block_public_policy     = false
+  ignore_public_acls      = false
+  restrict_public_buckets = false
+}
+
+# Bucket policy for public website access
+resource "aws_s3_bucket_policy" "blog" {
+  bucket = aws_s3_bucket.blog.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid       = "PublicReadGetObject"
+        Effect    = "Allow"
+        Principal = "*"
+        Action    = "s3:GetObject"
+        Resource  = "${aws_s3_bucket.blog.arn}/*"
+      }
+    ]
+  })
+}
+
+# Output the bucket information
+output "bucket_name" {
+  description = "Name of the S3 bucket"
+  value       = aws_s3_bucket.blog.id
+}
+
+output "bucket_arn" {
+  description = "ARN of the S3 bucket"
+  value       = aws_s3_bucket.blog.arn
+}
+
+output "website_endpoint" {
+  description = "Website endpoint for the S3 bucket"
+  value       = aws_s3_bucket_website_configuration.blog.website_endpoint
 }
