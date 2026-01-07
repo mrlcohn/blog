@@ -55,19 +55,3 @@ resource "aws_s3_bucket_policy" "blog" {
     ]
   })
 }
-
-# Output the bucket information
-output "bucket_name" {
-  description = "Name of the S3 bucket"
-  value       = aws_s3_bucket.blog.id
-}
-
-output "bucket_arn" {
-  description = "ARN of the S3 bucket"
-  value       = aws_s3_bucket.blog.arn
-}
-
-output "website_endpoint" {
-  description = "Website endpoint for the S3 bucket"
-  value       = aws_s3_bucket_website_configuration.blog.website_endpoint
-}

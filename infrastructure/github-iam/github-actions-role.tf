@@ -76,7 +76,7 @@ resource "aws_iam_policy" "terraform_state_access" {
 # Policy for Terraform to manage S3 blog bucket resources
 resource "aws_iam_policy" "blog_terraform" {
   name        = "BlogTerraformPolicy"
-  description = "Allows Terraform to manage blog S3 bucket infrastructure"
+  description = "Allows Terraform to manage blog infrastructure"
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -112,6 +112,47 @@ resource "aws_iam_policy" "blog_terraform" {
           "s3:GetBucketObjectLockConfiguration"
         ]
         Resource = "arn:aws:s3:::${var.blog_bucket_name}"
+      },
+      {
+        Sid    = "ManageCloudFront"
+        Effect = "Allow"
+        Action = [
+          "cloudfront:CreateDistribution",
+          "cloudfront:GetDistribution",
+          "cloudfront:GetDistributionConfig",
+          "cloudfront:UpdateDistribution",
+          "cloudfront:DeleteDistribution",
+          "cloudfront:TagResource",
+          "cloudfront:UntagResource",
+          "cloudfront:ListTagsForResource",
+          "cloudfront:CreateInvalidation"
+        ]
+        Resource = "*"
+      },
+      {
+        Sid    = "ManageACM"
+        Effect = "Allow"
+        Action = [
+          "acm:RequestCertificate",
+          "acm:DescribeCertificate",
+          "acm:DeleteCertificate",
+          "acm:ListCertificates",
+          "acm:AddTagsToCertificate",
+          "acm:ListTagsForCertificate"
+        ]
+        Resource = "*"
+      },
+      {
+        Sid    = "ManageRoute53"
+        Effect = "Allow"
+        Action = [
+          "route53:GetHostedZone",
+          "route53:ListHostedZones",
+          "route53:ListResourceRecordSets",
+          "route53:ChangeResourceRecordSets",
+          "route53:GetChange"
+        ]
+        Resource = "*"
       }
     ]
   })

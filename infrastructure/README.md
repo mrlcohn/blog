@@ -8,7 +8,10 @@ Modular Terraform configuration for blog infrastructure with separate state file
 1. **[GITHUB-SETUP.md](GITHUB-SETUP.md)** - Configure GitHub secrets and variables (do this first!)
 2. **[BEST-PRACTICES.md](BEST-PRACTICES.md)** - Review Terraform best practices (plan files, security, etc.)
 
-**After completing the above**, you're ready to run the setup script.
+**After initial setup:**
+3. **[CLOUDFRONT-SETUP.md](CLOUDFRONT-SETUP.md)** - CloudFront + ACM certificate setup for custom domain and HTTPS
+
+**After completing steps 1-2**, you're ready to run the setup script. Complete step 3 after your initial infrastructure is deployed.
 
 ## Quick Start
 
@@ -130,6 +133,7 @@ Use this for the `AWS_ROLE_ARN` GitHub secret.
 | **[README.md](README.md)** _(you are here)_ | Quick overview and getting started guide |
 | **[GITHUB-SETUP.md](GITHUB-SETUP.md)** ⭐ | **START HERE** - Step-by-step GitHub configuration (secrets & variables) |
 | **[BEST-PRACTICES.md](BEST-PRACTICES.md)** ⭐ | **READ THIS** - Terraform standards, plan files, security practices |
+| **[CLOUDFRONT-SETUP.md](CLOUDFRONT-SETUP.md)** | CloudFront + ACM setup - custom domain and HTTPS configuration |
 | **[QUICKREF.md](QUICKREF.md)** | Command cheat sheet - common commands and troubleshooting |
 | **[README-MODULAR.md](README-MODULAR.md)** | Comprehensive guide - detailed modular architecture explanation |
 | **[SUMMARY.md](SUMMARY.md)** | What changed and why - refactoring details and migration guide |
@@ -140,6 +144,7 @@ Use this for the `AWS_ROLE_ARN` GitHub secret.
 1. Read [GITHUB-SETUP.md](GITHUB-SETUP.md) and complete checklist
 2. Review [BEST-PRACTICES.md](BEST-PRACTICES.md)
 3. Run `./setup-modular.sh`
+4. Deploy CloudFront with [CLOUDFRONT-SETUP.md](CLOUDFRONT-SETUP.md)
 
 **Need a command?**
 → [QUICKREF.md](QUICKREF.md)

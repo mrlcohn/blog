@@ -8,3 +8,13 @@ variable "blog_bucket_name" {
   description = "Name of the S3 bucket for blog hosting"
   type        = string
 }
+
+variable "domain_name" {
+  description = "Domain name for the blog (e.g., blog.example.com)"
+  type        = string
+}
+
+variable "route53_zone_name" {
+  description = "Route53 hosted zone name (e.g., example.com)"
+  type        = string
+}

@@ -66,8 +66,10 @@ jobs:
       - name: Create terraform.tfvars
         run: |
           cat > terraform.tfvars <<EOF
-          aws_region       = "${{ env.AWS_REGION }}"
-          blog_bucket_name = "${{ vars.BLOG_BUCKET_NAME }}"
+          aws_region         = "${{ env.AWS_REGION }}"
+          blog_bucket_name   = "${{ vars.BLOG_BUCKET_NAME }}"
+          domain_name        = "${{ vars.DOMAIN_NAME }}"
+          route53_zone_name  = "${{ vars.ROUTE53_ZONE_NAME }}"
           EOF
 
       - name: Terraform Init
