@@ -1,3 +1,12 @@
+# CloudFront Origin Access Control
+resource "aws_cloudfront_origin_access_control" "blog" {
+  name                              = "blog-oac"
+  description                       = "OAC for blog S3 bucket"
+  origin_access_control_origin_type = "s3"
+  signing_behavior                  = "always"
+  signing_protocol                  = "sigv4"
+}
+
 # CloudFront distribution for the blog
 resource "aws_cloudfront_distribution" "blog" {
   enabled             = true
@@ -6,18 +15,11 @@ resource "aws_cloudfront_distribution" "blog" {
   aliases             = [var.domain_name]
   price_class         = "PriceClass_100" # Use only North America and Europe edge locations
 
-  # S3 website endpoint as origin
+  # S3 bucket as origin (using OAC for private access)
   origin {
-    domain_name = aws_s3_bucket_website_configuration.blog.website_endpoint
-    origin_id   = "S3-${var.blog_bucket_name}"
-
-    # Use custom origin for S3 website endpoint (not S3 origin)
-    custom_origin_config {
-      http_port              = 80
-      https_port             = 443
-      origin_protocol_policy = "http-only" # S3 website endpoints only support HTTP
-      origin_ssl_protocols   = ["TLSv1.2"]
-    }
+    domain_name              = aws_s3_bucket.blog.bucket_regional_domain_name
+    origin_id                = "S3-${var.blog_bucket_name}"
+    origin_access_control_id = aws_cloudfront_origin_access_control.blog.id
   }
 
   # Default cache behavior

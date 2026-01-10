@@ -12,45 +12,38 @@ resource "aws_s3_bucket_versioning" "blog" {
   }
 }
 
-# Configure static website hosting
-resource "aws_s3_bucket_website_configuration" "blog" {
-  bucket = aws_s3_bucket.blog.id
-
-  index_document {
-    suffix = "index.html"
-  }
-
-  error_document {
-    key = "index.html"
-  }
-}
-
-# Allow public access for website hosting (will restrict to CloudFront later)
+# Block all public access - bucket is completely private
 resource "aws_s3_bucket_public_access_block" "blog" {
   bucket = aws_s3_bucket.blog.id
 
-  block_public_acls       = false
-  block_public_policy     = false
-  ignore_public_acls      = false
-  restrict_public_buckets = false
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
 }
 
-# Bucket policy for public website access
+# Bucket policy to allow CloudFront OAC access only
 resource "aws_s3_bucket_policy" "blog" {
   bucket = aws_s3_bucket.blog.id
 
-  # Ensure public access block is configured first
   depends_on = [aws_s3_bucket_public_access_block.blog]
 
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
-        Sid       = "PublicReadGetObject"
-        Effect    = "Allow"
-        Principal = "*"
-        Action    = "s3:GetObject"
-        Resource  = "${aws_s3_bucket.blog.arn}/*"
+        Sid    = "AllowCloudFrontServicePrincipal"
+        Effect = "Allow"
+        Principal = {
+          Service = "cloudfront.amazonaws.com"
+        }
+        Action   = "s3:GetObject"
+        Resource = "${aws_s3_bucket.blog.arn}/*"
+        Condition = {
+          StringEquals = {
+            "AWS:SourceArn" = aws_cloudfront_distribution.blog.arn
+          }
+        }
       }
     ]
   })

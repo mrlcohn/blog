@@ -150,7 +150,8 @@ resource "aws_iam_policy" "blog_terraform" {
           "route53:ListHostedZones",
           "route53:ListResourceRecordSets",
           "route53:ChangeResourceRecordSets",
-          "route53:GetChange"
+          "route53:GetChange",
+          "route53:ListTagsForResource"
         ]
         Resource = "*"
       }

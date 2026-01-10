@@ -9,11 +9,6 @@ output "bucket_arn" {
   value       = aws_s3_bucket.blog.arn
 }
 
-output "website_endpoint" {
-  description = "Website endpoint for the S3 bucket"
-  value       = aws_s3_bucket_website_configuration.blog.website_endpoint
-}
-
 # CloudFront outputs
 output "cloudfront_distribution_id" {
   description = "CloudFront distribution ID"
