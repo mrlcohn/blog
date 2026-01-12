@@ -224,10 +224,15 @@ See [DEPLOYMENT-CHECKLIST.md](DEPLOYMENT-CHECKLIST.md) for complete setup.
 2. Push to main
 3. **Runs**: `terraform (blog)` + `deploy` (~10-15 min)
 
-### Scenario 3: API Change
-1. Edit Lambda function in `api/lambdas/`
+### Scenario 3: Lambda Function Code Change
+1. Edit Lambda function in `api/lambdas/get_blog/lambda_function.py`
 2. Push to main
 3. **Runs**: `terraform (api)` + `deploy` (~5-7 min)
+4. **What happens**:
+   - Terraform detects code change via `source_code_hash`
+   - Creates new zip file automatically
+   - Updates Lambda function with new code
+   - No manual zip/upload required
 
 ### Scenario 4: Both Infrastructure Modules Changed
 1. Edit both `infrastructure/blog/` and `infrastructure/api/`

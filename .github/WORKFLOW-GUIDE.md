@@ -79,11 +79,11 @@ The workflow only runs when specific paths change:
 
 ### 1. check-paths
 
-Uses [dorny/paths-filter@v2](https://github.com/dorny/paths-filter) to detect changed files.
+Uses [dorny/paths-filter@v3](https://github.com/dorny/paths-filter) to detect changed files.
 
 **Outputs**:
 - `blog`: true if `infrastructure/blog/**` changed
-- `api`: true if `infrastructure/api/**` or `api/**` changed
+- `api`: true if `infrastructure/api/**` or `api/**` changed (includes Lambda function code)
 - `frontend`: true if `frontend/**` changed
 
 ### 2. terraform (Matrix Strategy)
@@ -155,10 +155,12 @@ Runs if:
 4. ~10-15 minutes (CloudFront takes longest)
 
 **API module** (Lambda, DynamoDB, etc.):
-1. Edit files in `infrastructure/api/` or `api/`
+1. Edit files in `infrastructure/api/` or `api/lambdas/`
 2. Commit and push
-3. API Terraform runs + frontend redeploys
+3. API Terraform runs (automatically zips and updates Lambda functions) + frontend redeploys
 4. ~5-7 minutes
+
+**Note**: Lambda function code changes are automatically detected via `source_code_hash`. When you update Python files in `api/lambdas/`, Terraform will create new zip files and update the Lambda functions.
 
 ### Both Modules Changed
 
