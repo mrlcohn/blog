@@ -1,6 +1,10 @@
 # S3 bucket for blog content and assets
 resource "aws_s3_bucket" "api_content" {
   bucket = var.api_bucket_name
+
+  lifecycle {
+    ignore_changes = [bucket]
+  }
 }
 
 # Enable versioning for content history

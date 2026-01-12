@@ -46,6 +46,10 @@ resource "aws_cloudwatch_log_group" "api_logs" {
   name              = "/aws/apigateway/blog-api"
   retention_in_days = 7
 
+  lifecycle {
+    ignore_changes = [name]
+  }
+
   tags = {
     Name = "Blog API Logs"
   }

@@ -23,3 +23,8 @@ variable "blog_bucket_name" {
   description = "Name of the S3 bucket for blog hosting"
   type        = string
 }
+
+variable "api_bucket_name" {
+  description = "Name of the S3 bucket for API content"
+  type        = string
+}

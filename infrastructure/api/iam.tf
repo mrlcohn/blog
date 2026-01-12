@@ -15,6 +15,10 @@ resource "aws_iam_role" "lambda_exec" {
     ]
   })
 
+  lifecycle {
+    ignore_changes = [name]
+  }
+
   tags = {
     Name = "Blog API Lambda Execution Role"
   }

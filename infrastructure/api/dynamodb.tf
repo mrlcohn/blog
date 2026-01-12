@@ -5,6 +5,10 @@ resource "aws_dynamodb_table" "blog_posts" {
   hash_key     = "PK"
   range_key    = "SK"
 
+  lifecycle {
+    ignore_changes = [name]
+  }
+
   attribute {
     name = "PK"
     type = "S"
