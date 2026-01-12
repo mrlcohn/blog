@@ -40,8 +40,31 @@ output "api_gateway_execution_arn" {
 output "lambda_functions" {
   description = "Lambda function names"
   value = {
-    get_blog_cards = aws_lambda_function.get_blog_cards.function_name
-    get_blog       = aws_lambda_function.get_blog.function_name
-    get_about      = aws_lambda_function.get_about.function_name
+    get_blog_cards   = aws_lambda_function.get_blog_cards.function_name
+    get_blog         = aws_lambda_function.get_blog.function_name
+    get_about        = aws_lambda_function.get_about.function_name
+    create_blog_post = aws_lambda_function.create_blog_post.function_name
+    authorizer       = aws_lambda_function.authorizer.function_name
   }
+}
+
+# Cognito outputs
+output "cognito_user_pool_id" {
+  description = "Cognito User Pool ID"
+  value       = aws_cognito_user_pool.blog_admin.id
+}
+
+output "cognito_user_pool_arn" {
+  description = "Cognito User Pool ARN"
+  value       = aws_cognito_user_pool.blog_admin.arn
+}
+
+output "cognito_client_id" {
+  description = "Cognito User Pool Client ID"
+  value       = aws_cognito_user_pool_client.blog_admin_client.id
+}
+
+output "cognito_domain" {
+  description = "Cognito User Pool Domain"
+  value       = aws_cognito_user_pool_domain.blog_admin.domain
 }

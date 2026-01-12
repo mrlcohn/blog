@@ -328,6 +328,33 @@ resource "aws_iam_policy" "api_terraform" {
           "iam:UntagPolicy"
         ]
         Resource = "*"
+      },
+      {
+        Sid    = "ManageCognito"
+        Effect = "Allow"
+        Action = [
+          "cognito-idp:CreateUserPool",
+          "cognito-idp:DeleteUserPool",
+          "cognito-idp:DescribeUserPool",
+          "cognito-idp:UpdateUserPool",
+          "cognito-idp:CreateUserPoolClient",
+          "cognito-idp:DeleteUserPoolClient",
+          "cognito-idp:DescribeUserPoolClient",
+          "cognito-idp:UpdateUserPoolClient",
+          "cognito-idp:CreateUserPoolDomain",
+          "cognito-idp:DeleteUserPoolDomain",
+          "cognito-idp:DescribeUserPoolDomain",
+          "cognito-idp:ListUserPools",
+          "cognito-idp:ListUserPoolClients",
+          "cognito-idp:ListTagsForResource",
+          "cognito-idp:TagResource",
+          "cognito-idp:UntagResource",
+          "cognito-idp:SetUserPoolMfaConfig",
+          "cognito-idp:GetUserPoolMfaConfig",
+          "cognito-idp:AdminCreateUser",
+          "cognito-idp:AdminSetUserPassword"
+        ]
+        Resource = "*"
       }
     ]
   })

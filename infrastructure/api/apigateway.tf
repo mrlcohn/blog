@@ -146,5 +146,48 @@ resource "aws_lambda_permission" "api_gw_get_about" {
   source_arn    = "${aws_apigatewayv2_api.blog_api.execution_arn}/*/*"
 }
 
+# Lambda Authorizer for protected endpoints
+resource "aws_apigatewayv2_authorizer" "cognito_authorizer" {
+  api_id           = aws_apigatewayv2_api.blog_api.id
+  authorizer_type  = "REQUEST"
+  authorizer_uri   = aws_lambda_function.authorizer.invoke_arn
+  identity_sources = ["$request.header.Authorization"]
+  name             = "cognito-authorizer"
+  authorizer_payload_format_version = "2.0"
+  enable_simple_responses = false
+}
+
+resource "aws_lambda_permission" "authorizer_api_gateway" {
+  statement_id  = "AllowAPIGatewayInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.authorizer.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_apigatewayv2_api.blog_api.execution_arn}/*/*"
+}
+
+# Lambda Integration: CreateBlogPost (Protected)
+resource "aws_apigatewayv2_integration" "create_blog_post" {
+  api_id           = aws_apigatewayv2_api.blog_api.id
+  integration_type = "AWS_PROXY"
+  integration_uri  = aws_lambda_function.create_blog_post.invoke_arn
+  payload_format_version = "2.0"
+}
+
+resource "aws_apigatewayv2_route" "create_blog_post" {
+  api_id             = aws_apigatewayv2_api.blog_api.id
+  route_key          = "POST /blogs"
+  target             = "integrations/${aws_apigatewayv2_integration.create_blog_post.id}"
+  authorizer_id      = aws_apigatewayv2_authorizer.cognito_authorizer.id
+  authorization_type = "CUSTOM"
+}
+
+resource "aws_lambda_permission" "api_gw_create_blog_post" {
+  statement_id  = "AllowAPIGatewayInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.create_blog_post.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_apigatewayv2_api.blog_api.execution_arn}/*/*"
+}
+
 # Custom domain for API (api.yourdomain.com or yourdomain.com/api)
 # We'll add this to CloudFront as a behavior instead
