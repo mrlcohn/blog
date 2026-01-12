@@ -113,7 +113,6 @@ resource "aws_lambda_function" "authorizer" {
   environment {
     variables = {
       USER_POOL_ID  = aws_cognito_user_pool.blog_admin.id
-      AWS_REGION    = var.aws_region
       APP_CLIENT_ID = aws_cognito_user_pool_client.blog_admin_client.id
     }
   }

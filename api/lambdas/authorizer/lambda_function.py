@@ -6,8 +6,9 @@ from jwt.exceptions import InvalidTokenError
 
 # Cognito settings
 USER_POOL_ID = os.environ['USER_POOL_ID']
-AWS_REGION = os.environ['AWS_REGION']
 APP_CLIENT_ID = os.environ['APP_CLIENT_ID']
+# AWS_REGION is automatically provided by Lambda
+AWS_REGION = os.environ.get('AWS_REGION', 'us-east-1')
 
 # JWKS URL for token verification
 JWKS_URL = f'https://cognito-idp.{AWS_REGION}.amazonaws.com/{USER_POOL_ID}/.well-known/jwks.json'
