@@ -22,16 +22,19 @@ resource "aws_cloudfront_distribution" "blog" {
     origin_access_control_id = aws_cloudfront_origin_access_control.blog.id
   }
 
-  # API Gateway as origin for /api/* requests
-  origin {
-    domain_name = replace(var.api_gateway_endpoint, "https://", "")
-    origin_id   = "APIGateway"
+  # API Gateway as origin for /api/* requests (conditional - only if endpoint provided)
+  dynamic "origin" {
+    for_each = var.api_gateway_endpoint != "" ? [1] : []
+    content {
+      domain_name = replace(var.api_gateway_endpoint, "https://", "")
+      origin_id   = "APIGateway"
 
-    custom_origin_config {
-      http_port              = 80
-      https_port             = 443
-      origin_protocol_policy = "https-only"
-      origin_ssl_protocols   = ["TLSv1.2"]
+      custom_origin_config {
+        http_port              = 80
+        https_port             = 443
+        origin_protocol_policy = "https-only"
+        origin_ssl_protocols   = ["TLSv1.2"]
+      }
     }
   }
 
@@ -55,26 +58,29 @@ resource "aws_cloudfront_distribution" "blog" {
     compress               = true
   }
 
-  # Cache behavior for API requests (no caching, forward all)
-  ordered_cache_behavior {
-    path_pattern     = "/api/*"
-    allowed_methods  = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
-    cached_methods   = ["GET", "HEAD"]
-    target_origin_id = "APIGateway"
+  # Cache behavior for API requests (no caching, forward all) - conditional
+  dynamic "ordered_cache_behavior" {
+    for_each = var.api_gateway_endpoint != "" ? [1] : []
+    content {
+      path_pattern     = "/api/*"
+      allowed_methods  = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
+      cached_methods   = ["GET", "HEAD"]
+      target_origin_id = "APIGateway"
 
-    forwarded_values {
-      query_string = true
-      headers      = ["Authorization", "Accept", "Content-Type"]
-      cookies {
-        forward = "all"
+      forwarded_values {
+        query_string = true
+        headers      = ["Authorization", "Accept", "Content-Type"]
+        cookies {
+          forward = "all"
+        }
       }
-    }
 
-    viewer_protocol_policy = "https-only"
-    min_ttl                = 0
-    default_ttl            = 0
-    max_ttl                = 0
-    compress               = true
+      viewer_protocol_policy = "https-only"
+      min_ttl                = 0
+      default_ttl            = 0
+      max_ttl                = 0
+      compress               = true
+    }
   }
 
   # Custom error response for SPA routing
