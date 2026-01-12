@@ -40,8 +40,8 @@ resource "aws_apigatewayv2_stage" "default" {
     Name = "Blog API Default Stage"
   }
 
-  # Ensure the CloudWatch role is configured before creating the stage
-  depends_on = [aws_api_gateway_account.api_gateway_account]
+  # Ensure the CloudWatch Logs resource policy is configured before creating the stage
+  depends_on = [aws_cloudwatch_log_resource_policy.api_gateway_logs]
 }
 
 # CloudWatch Log Group for API Gateway logs
