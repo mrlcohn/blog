@@ -10,8 +10,9 @@ Modular Terraform configuration for blog infrastructure with separate state file
 
 **After initial setup:**
 3. **[CLOUDFRONT-SETUP.md](CLOUDFRONT-SETUP.md)** - CloudFront + ACM certificate setup for custom domain and HTTPS
+4. **[API-SETUP.md](API-SETUP.md)** - Backend API setup (Lambda, API Gateway, DynamoDB, S3)
 
-**After completing steps 1-2**, you're ready to run the setup script. Complete step 3 after your initial infrastructure is deployed.
+**After completing steps 1-2**, you're ready to run the setup script. Complete steps 3-4 after your initial infrastructure is deployed.
 
 ## Quick Start
 
@@ -30,7 +31,8 @@ This automated script will:
 infrastructure/
 ├── bootstrap/        → blog/bootstrap.tfstate (OIDC provider)
 ├── github-iam/       → blog/github-iam.tfstate (IAM roles)
-└── blog/             → blog/blog.tfstate (Blog resources)
+├── blog/             → blog/blog.tfstate (S3, CloudFront, ACM)
+└── api/              → blog/api.tfstate (Lambda, API Gateway, DynamoDB)
 ```
 
 Each module has its own state file in the same S3 bucket under the `blog/` prefix.
@@ -134,17 +136,26 @@ Use this for the `AWS_ROLE_ARN` GitHub secret.
 | **[GITHUB-SETUP.md](GITHUB-SETUP.md)** ⭐ | **START HERE** - Step-by-step GitHub configuration (secrets & variables) |
 | **[BEST-PRACTICES.md](BEST-PRACTICES.md)** ⭐ | **READ THIS** - Terraform standards, plan files, security practices |
 | **[CLOUDFRONT-SETUP.md](CLOUDFRONT-SETUP.md)** | CloudFront + ACM setup - custom domain and HTTPS configuration |
+| **[API-SETUP.md](API-SETUP.md)** | Backend API setup - Lambda, API Gateway, DynamoDB, and S3 for content |
 | **[QUICKREF.md](QUICKREF.md)** | Command cheat sheet - common commands and troubleshooting |
 | **[README-MODULAR.md](README-MODULAR.md)** | Comprehensive guide - detailed modular architecture explanation |
 | **[SUMMARY.md](SUMMARY.md)** | What changed and why - refactoring details and migration guide |
+
+### Automation Documentation
+
+| File | Purpose |
+|------|---------|
+| **[../.github/WORKFLOW-GUIDE.md](../.github/WORKFLOW-GUIDE.md)** | GitHub Actions workflow guide - how automated deployment works |
+| **[../.github/DEPLOYMENT-CHECKLIST.md](../.github/DEPLOYMENT-CHECKLIST.md)** | Complete deployment checklist - step-by-step setup guide |
 
 ### Quick Navigation
 
 **Setting up for the first time?**
 1. Read [GITHUB-SETUP.md](GITHUB-SETUP.md) and complete checklist
 2. Review [BEST-PRACTICES.md](BEST-PRACTICES.md)
-3. Run `./setup-modular.sh`
+3. Follow [../.github/DEPLOYMENT-CHECKLIST.md](../.github/DEPLOYMENT-CHECKLIST.md) for complete setup
 4. Deploy CloudFront with [CLOUDFRONT-SETUP.md](CLOUDFRONT-SETUP.md)
+5. Deploy API backend with [API-SETUP.md](API-SETUP.md)
 
 **Need a command?**
 → [QUICKREF.md](QUICKREF.md)
@@ -154,3 +165,9 @@ Use this for the `AWS_ROLE_ARN` GitHub secret.
 
 **Forgot what changed?**
 → [SUMMARY.md](SUMMARY.md)
+
+**Setting up automation?**
+→ [../.github/DEPLOYMENT-CHECKLIST.md](../.github/DEPLOYMENT-CHECKLIST.md)
+
+**Troubleshooting GitHub Actions?**
+→ [../.github/WORKFLOW-GUIDE.md](../.github/WORKFLOW-GUIDE.md)

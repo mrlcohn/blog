@@ -6,6 +6,8 @@ on:
       - main
     paths:
       - 'infrastructure/blog/**'
+      - 'infrastructure/api/**'
+      - 'api/**'
       - 'frontend/**'
       - '.github/workflows/deploy.yml'
   workflow_dispatch:  # Allow manual triggers
@@ -25,7 +27,8 @@ jobs:
     name: Check Changed Paths
     runs-on: ubuntu-latest
     outputs:
-      infrastructure: ${{ steps.filter.outputs.infrastructure }}
+      blog: ${{ steps.filter.outputs.blog }}
+      api: ${{ steps.filter.outputs.api }}
       frontend: ${{ steps.filter.outputs.frontend }}
     steps:
       - uses: actions/checkout@v4
@@ -33,20 +36,31 @@ jobs:
         id: filter
         with:
           filters: |
-            infrastructure:
+            blog:
               - 'infrastructure/blog/**'
+            api:
+              - 'infrastructure/api/**'
+              - 'api/**'
             frontend:
               - 'frontend/**'
 
-  terraform-blog:
-    name: Terraform - Blog Infrastructure
+  terraform:
+    name: Terraform - ${{ matrix.module }}
     runs-on: ubuntu-latest
     needs: check-paths
-    if: needs.check-paths.outputs.infrastructure == 'true' || github.event_name == 'workflow_dispatch'
+    if: |
+      (matrix.module == 'blog' && (needs.check-paths.outputs.blog == 'true' || github.event_name == 'workflow_dispatch')) ||
+      (matrix.module == 'api' && (needs.check-paths.outputs.api == 'true' || github.event_name == 'workflow_dispatch'))
+
+    strategy:
+      matrix:
+        module:
+          - blog
+          - api
 
     defaults:
       run:
-        working-directory: infrastructure/blog
+        working-directory: infrastructure/${{ matrix.module }}
 
     steps:
       - name: Checkout code
@@ -65,12 +79,22 @@ jobs:
 
       - name: Create terraform.tfvars
         run: |
-          cat > terraform.tfvars <<EOF
+          if [ "${{ matrix.module }}" = "blog" ]; then
+            cat > terraform.tfvars <<EOF
+          aws_region            = "${{ env.AWS_REGION }}"
+          blog_bucket_name      = "${{ vars.BLOG_BUCKET_NAME }}"
+          domain_name           = "${{ vars.DOMAIN_NAME }}"
+          route53_zone_name     = "${{ vars.ROUTE53_ZONE_NAME }}"
+          api_gateway_endpoint  = "${{ vars.API_GATEWAY_ENDPOINT }}"
+          EOF
+          else
+            cat > terraform.tfvars <<EOF
           aws_region         = "${{ env.AWS_REGION }}"
-          blog_bucket_name   = "${{ vars.BLOG_BUCKET_NAME }}"
+          api_bucket_name    = "${{ vars.API_BUCKET_NAME }}"
           domain_name        = "${{ vars.DOMAIN_NAME }}"
           route53_zone_name  = "${{ vars.ROUTE53_ZONE_NAME }}"
           EOF
+          fi
 
       - name: Terraform Init
         run: |
@@ -98,11 +122,11 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - check-paths
-      - terraform-blog
+      - terraform
     if: |
       always() &&
-      (needs.terraform-blog.result == 'success' || needs.terraform-blog.result == 'skipped') &&
-      (needs.check-paths.outputs.frontend == 'true' || needs.check-paths.outputs.infrastructure == 'true' || github.event_name == 'workflow_dispatch')
+      (needs.terraform.result == 'success' || needs.terraform.result == 'skipped') &&
+      (needs.check-paths.outputs.frontend == 'true' || needs.check-paths.outputs.blog == 'true' || needs.check-paths.outputs.api == 'true' || github.event_name == 'workflow_dispatch')
 
     defaults:
       run:

@@ -39,7 +39,7 @@ function BlogPostCard({ post }: BlogPostCardProps) {
           })}
         </Typography>
         <Typography variant="body1" color="text.secondary" sx={{ mb: 1.5, lineHeight: 1.7 }}>
-          {post.excerpt}
+          {post.summary}
         </Typography>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75, mt: 1 }}>
           {post.tags.map((tag) => (

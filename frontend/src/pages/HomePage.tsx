@@ -1,10 +1,22 @@
-import { Typography, Box } from '@mui/material';
+import { Typography, Box, CircularProgress } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import BlogPostCard from '../components/BlogPostCard';
-import { mockPosts } from '../data/mockPosts';
+import { fetchBlogCards, type BlogCardData } from '../services/api';
 
 function HomePage() {
   const navigate = useNavigate();
+  const [posts, setPosts] = useState<BlogCardData[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadPosts() {
+      const data = await fetchBlogCards();
+      setPosts(data);
+      setLoading(false);
+    }
+    loadPosts();
+  }, []);
   return (
     <Box sx={{ minHeight: '100vh', py: 4 }}>
       <Box sx={{ maxWidth: '1100px', mx: 'auto', px: { xs: 2, sm: 3 } }}>
@@ -77,9 +89,19 @@ function HomePage() {
             gap: 3,
           }}
         >
-          {mockPosts.map((post) => (
-            <BlogPostCard key={post.slug} post={post} />
-          ))}
+          {loading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+              <CircularProgress />
+            </Box>
+          ) : posts.length === 0 ? (
+            <Typography variant="body1" color="text.secondary" sx={{ textAlign: 'center', py: 8 }}>
+              No posts yet. Check back soon!
+            </Typography>
+          ) : (
+            posts.map((post) => (
+              <BlogPostCard key={post.slug} post={post} />
+            ))
+          )}
         </Box>
       </Box>
     </Box>

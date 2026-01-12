@@ -1,13 +1,42 @@
 import { useParams } from 'react-router-dom';
-import { Typography, Box, Chip, Paper } from '@mui/material';
-import { mockPosts } from '../data/mockPosts';
+import { Typography, Box, Chip, Paper, CircularProgress } from '@mui/material';
+import { useEffect, useState } from 'react';
+import { fetchBlogPost, type BlogPost } from '../services/api';
 
 function BlogPostPage() {
   const { id: slug } = useParams<{ id: string }>();
+  const [post, setPost] = useState<BlogPost | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
 
-  const post = mockPosts.find((p) => p.slug === slug);
+  useEffect(() => {
+    async function loadPost() {
+      if (!slug) {
+        setNotFound(true);
+        setLoading(false);
+        return;
+      }
 
-  if (!post) {
+      const data = await fetchBlogPost(slug);
+      if (data) {
+        setPost(data);
+      } else {
+        setNotFound(true);
+      }
+      setLoading(false);
+    }
+    loadPost();
+  }, [slug]);
+
+  if (loading) {
+    return (
+      <Box sx={{ minHeight: '100vh', py: 4, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (notFound || !post) {
     return (
       <Box sx={{ minHeight: '100vh', py: 4 }}>
         <Box sx={{ maxWidth: '900px', mx: 'auto', px: { xs: 2, sm: 3 } }}>

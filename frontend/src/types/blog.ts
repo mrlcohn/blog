@@ -1,11 +1,12 @@
 export type BlogPost = {
-  id: string; // Internal ID (for database)
-  slug: string; // URL-friendly identifier
+  slug: string;
   title: string;
-  excerpt: string;
-  content: string;
   author: string;
   publishDate: string;
   tags: string[];
-  coverImage?: string;
+  summary: string; // Brief summary for cards
+  content?: string; // Full content (only in detail view)
+  lastModifiedDate?: string;
+  contentType?: string;
+  imageKey?: string;
 };

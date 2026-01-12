@@ -1,0 +1,8 @@
+# Example terraform variables for local development
+# Copy this to terraform.tfvars and fill in your values
+# terraform.tfvars is gitignored
+
+aws_region         = "us-east-1"
+api_bucket_name    = "your-blog-api-content"
+domain_name        = "blog.yourdomain.com"
+route53_zone_name  = "yourdomain.com"

@@ -22,7 +22,20 @@ resource "aws_cloudfront_distribution" "blog" {
     origin_access_control_id = aws_cloudfront_origin_access_control.blog.id
   }
 
-  # Default cache behavior
+  # API Gateway as origin for /api/* requests
+  origin {
+    domain_name = replace(var.api_gateway_endpoint, "https://", "")
+    origin_id   = "APIGateway"
+
+    custom_origin_config {
+      http_port              = 80
+      https_port             = 443
+      origin_protocol_policy = "https-only"
+      origin_ssl_protocols   = ["TLSv1.2"]
+    }
+  }
+
+  # Default cache behavior (S3 frontend)
   default_cache_behavior {
     allowed_methods  = ["GET", "HEAD", "OPTIONS"]
     cached_methods   = ["GET", "HEAD"]
@@ -39,6 +52,28 @@ resource "aws_cloudfront_distribution" "blog" {
     min_ttl                = 0
     default_ttl            = 3600  # 1 hour
     max_ttl                = 86400 # 24 hours
+    compress               = true
+  }
+
+  # Cache behavior for API requests (no caching, forward all)
+  ordered_cache_behavior {
+    path_pattern     = "/api/*"
+    allowed_methods  = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
+    cached_methods   = ["GET", "HEAD"]
+    target_origin_id = "APIGateway"
+
+    forwarded_values {
+      query_string = true
+      headers      = ["Authorization", "Accept", "Content-Type"]
+      cookies {
+        forward = "all"
+      }
+    }
+
+    viewer_protocol_policy = "https-only"
+    min_ttl                = 0
+    default_ttl            = 0
+    max_ttl                = 0
     compress               = true
   }
 

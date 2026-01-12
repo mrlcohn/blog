@@ -125,7 +125,11 @@ resource "aws_iam_policy" "blog_terraform" {
           "cloudfront:TagResource",
           "cloudfront:UntagResource",
           "cloudfront:ListTagsForResource",
-          "cloudfront:CreateInvalidation"
+          "cloudfront:CreateInvalidation",
+          "cloudfront:CreateOriginAccessControl",
+          "cloudfront:GetOriginAccessControl",
+          "cloudfront:UpdateOriginAccessControl",
+          "cloudfront:DeleteOriginAccessControl"
         ]
         Resource = "*"
       },
@@ -185,6 +189,107 @@ resource "aws_iam_policy" "blog_deployment" {
   })
 }
 
+# Policy for API infrastructure management
+resource "aws_iam_policy" "api_terraform" {
+  name        = "APITerraformPolicy"
+  description = "Allows Terraform to manage API infrastructure"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "ManageLambda"
+        Effect = "Allow"
+        Action = [
+          "lambda:CreateFunction",
+          "lambda:DeleteFunction",
+          "lambda:GetFunction",
+          "lambda:GetFunctionConfiguration",
+          "lambda:UpdateFunctionCode",
+          "lambda:UpdateFunctionConfiguration",
+          "lambda:ListFunctions",
+          "lambda:TagResource",
+          "lambda:UntagResource",
+          "lambda:ListTags",
+          "lambda:AddPermission",
+          "lambda:RemovePermission",
+          "lambda:GetPolicy"
+        ]
+        Resource = "*"
+      },
+      {
+        Sid    = "ManageAPIGateway"
+        Effect = "Allow"
+        Action = [
+          "apigateway:GET",
+          "apigateway:POST",
+          "apigateway:PUT",
+          "apigateway:PATCH",
+          "apigateway:DELETE",
+          "apigateway:TagResource",
+          "apigateway:UntagResource"
+        ]
+        Resource = "*"
+      },
+      {
+        Sid    = "ManageDynamoDB"
+        Effect = "Allow"
+        Action = [
+          "dynamodb:CreateTable",
+          "dynamodb:DeleteTable",
+          "dynamodb:DescribeTable",
+          "dynamodb:UpdateTable",
+          "dynamodb:TagResource",
+          "dynamodb:UntagResource",
+          "dynamodb:ListTagsOfResource",
+          "dynamodb:DescribeContinuousBackups",
+          "dynamodb:UpdateContinuousBackups",
+          "dynamodb:DescribeTimeToLive",
+          "dynamodb:UpdateTimeToLive"
+        ]
+        Resource = "*"
+      },
+      {
+        Sid    = "ManageCloudWatchLogs"
+        Effect = "Allow"
+        Action = [
+          "logs:CreateLogGroup",
+          "logs:DeleteLogGroup",
+          "logs:DescribeLogGroups",
+          "logs:PutRetentionPolicy",
+          "logs:TagResource",
+          "logs:UntagResource",
+          "logs:ListTagsForResource"
+        ]
+        Resource = "*"
+      },
+      {
+        Sid    = "ManageIAMForLambda"
+        Effect = "Allow"
+        Action = [
+          "iam:CreateRole",
+          "iam:DeleteRole",
+          "iam:GetRole",
+          "iam:PassRole",
+          "iam:AttachRolePolicy",
+          "iam:DetachRolePolicy",
+          "iam:CreatePolicy",
+          "iam:DeletePolicy",
+          "iam:GetPolicy",
+          "iam:GetPolicyVersion",
+          "iam:ListPolicyVersions",
+          "iam:ListAttachedRolePolicies",
+          "iam:TagRole",
+          "iam:UntagRole",
+          "iam:TagPolicy",
+          "iam:UntagPolicy"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
+
 # Attach policies to the role
 resource "aws_iam_role_policy_attachment" "terraform_state" {
   role       = aws_iam_role.github_actions.name
@@ -199,4 +304,9 @@ resource "aws_iam_role_policy_attachment" "blog_terraform" {
 resource "aws_iam_role_policy_attachment" "blog_deployment" {
   role       = aws_iam_role.github_actions.name
   policy_arn = aws_iam_policy.blog_deployment.arn
+}
+
+resource "aws_iam_role_policy_attachment" "api_terraform" {
+  role       = aws_iam_role.github_actions.name
+  policy_arn = aws_iam_policy.api_terraform.arn
 }

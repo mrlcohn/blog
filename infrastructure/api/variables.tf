@@ -4,8 +4,8 @@ variable "aws_region" {
   default     = "us-east-1"
 }
 
-variable "blog_bucket_name" {
-  description = "Name of the S3 bucket for blog hosting"
+variable "api_bucket_name" {
+  description = "Name of the S3 bucket for blog content and assets"
   type        = string
 }
 
@@ -16,10 +16,5 @@ variable "domain_name" {
 
 variable "route53_zone_name" {
   description = "Route53 hosted zone name (e.g., example.com)"
-  type        = string
-}
-
-variable "api_gateway_endpoint" {
-  description = "API Gateway endpoint URL from the API module"
   type        = string
 }

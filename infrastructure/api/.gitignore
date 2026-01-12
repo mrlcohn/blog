@@ -1,0 +1,18 @@
+# Terraform files
+*.tfstate
+*.tfstate.*
+*.tfvars
+backend-config.hcl
+.terraform/
+.terraform.lock.hcl
+tfplan
+*.tfplan
+
+# Lambda zips
+lambda_zips/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
