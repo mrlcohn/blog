@@ -295,6 +295,9 @@ resource "aws_iam_policy" "api_terraform" {
           "logs:DescribeLogGroups",
           "logs:PutRetentionPolicy",
           "logs:CreateLogDelivery",
+          "logs:PutResourcePolicy",
+          "logs:DeleteResourcePolicy",
+          "logs:DescribeResourcePolicies",
           "logs:TagResource",
           "logs:UntagResource",
           "logs:ListTagsForResource"
@@ -318,6 +321,7 @@ resource "aws_iam_policy" "api_terraform" {
           "iam:ListPolicyVersions",
           "iam:ListAttachedRolePolicies",
           "iam:ListRolePolicies",
+          "iam:ListInstanceProfilesForRole",
           "iam:TagRole",
           "iam:UntagRole",
           "iam:TagPolicy",
