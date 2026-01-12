@@ -263,7 +263,8 @@ resource "aws_iam_policy" "api_terraform" {
           "apigateway:PATCH",
           "apigateway:DELETE",
           "apigateway:TagResource",
-          "apigateway:UntagResource"
+          "apigateway:UntagResource",
+          "apigateway:UpdateAccount"
         ]
         Resource = "*"
       },
