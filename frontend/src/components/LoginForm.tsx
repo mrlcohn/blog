@@ -28,14 +28,18 @@ export default function LoginForm({ onLoginSuccess, onForgotPassword }: LoginFor
       await signIn({ username: email, password });
       onLoginSuccess();
     } catch (err: any) {
-      console.error('Login error - Full error object:', err);
-      console.error('Error name:', err.name);
-      console.error('Error message:', err.message);
-      console.error('Error code:', err.code);
-      console.error('Error underlyingError:', err.underlyingError);
+      // Map common errors to user-friendly messages
+      let errorMessage = 'Invalid email or password';
 
-      // Show the actual error message in UI for debugging
-      setError(`${err.name || 'Error'}: ${err.message || 'Login failed'}`);
+      if (err.name === 'UserNotConfirmedException') {
+        errorMessage = 'Please verify your email address';
+      } else if (err.name === 'PasswordResetRequiredException') {
+        errorMessage = 'Password reset required. Please use "Forgot Password?"';
+      } else if (err.name === 'TooManyRequestsException') {
+        errorMessage = 'Too many attempts. Please try again later';
+      }
+
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

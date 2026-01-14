@@ -64,13 +64,13 @@ function Header() {
           {authenticated && (
             <Button
               color="inherit"
-              onClick={() => navigate('/admin')}
+              onClick={() => navigate('/create')}
               sx={{
-                color: location.pathname === '/admin' ? 'primary.main' : 'text.primary',
-                fontWeight: location.pathname === '/admin' ? 600 : 400,
+                color: location.pathname === '/create' ? 'primary.main' : 'text.primary',
+                fontWeight: location.pathname === '/create' ? 600 : 400,
               }}
             >
-              Admin
+              Create
             </Button>
           )}
         </Box>
@@ -89,7 +89,7 @@ function Header() {
         ) : (
           <Button
             color="inherit"
-            onClick={() => navigate('/admin')}
+            onClick={() => navigate('/login')}
             sx={{
               color: 'text.primary',
               fontWeight: 400,

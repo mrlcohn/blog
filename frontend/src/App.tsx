@@ -4,7 +4,8 @@ import Header from './components/Header';
 import HomePage from './pages/HomePage';
 import BlogPostPage from './pages/BlogPostPage';
 import AboutPage from './pages/AboutPage';
-import AdminPage from './pages/AdminPage';
+import LoginPage from './pages/LoginPage';
+import CreatePostPage from './pages/CreatePostPage';
 
 const theme = createTheme({
   palette: {
@@ -43,7 +44,8 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/posts/:id" element={<BlogPostPage />} />
           <Route path="/about" element={<AboutPage />} />
-          <Route path="/admin" element={<AdminPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/create" element={<CreatePostPage />} />
         </Routes>
       </Router>
     </ThemeProvider>

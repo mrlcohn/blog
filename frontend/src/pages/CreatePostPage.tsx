@@ -16,9 +16,7 @@ import {
   MenuItem,
   CircularProgress,
 } from '@mui/material';
-import { isAuthenticated, getAuthHeader, clearTokens } from '../utils/auth';
-import LoginForm from '../components/LoginForm';
-import PasswordResetForm from '../components/PasswordResetForm';
+import { isAuthenticated, getAuthHeader } from '../utils/auth';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -32,15 +30,13 @@ interface BlogFormData {
   status: 'draft' | 'published';
 }
 
-const AdminPage = () => {
+const CreatePostPage = () => {
   const navigate = useNavigate();
-  const [authenticated, setAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [tagInput, setTagInput] = useState('');
-  const [showPasswordReset, setShowPasswordReset] = useState(false);
+  const [tagInput, setTagInput] = useState('');;
 
   const [formData, setFormData] = useState<BlogFormData>({
     slug: '',
@@ -53,25 +49,17 @@ const AdminPage = () => {
   });
 
   useEffect(() => {
-    // Check authentication status
+    // Check authentication status and redirect if not authenticated
     const checkAuth = async () => {
       setLoading(true);
       const authed = await isAuthenticated();
-      setAuthenticated(authed);
+      if (!authed) {
+        navigate('/login');
+      }
       setLoading(false);
     };
     checkAuth();
-  }, []);
-
-  const handleLoginSuccess = () => {
-    setAuthenticated(true);
-    setShowPasswordReset(false);
-  };
-
-  const handleLogout = async () => {
-    await clearTokens();
-    setAuthenticated(false);
-  };
+  }, [navigate]);
 
   const handleInputChange = (field: keyof BlogFormData, value: string | string[]) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -163,39 +151,12 @@ const AdminPage = () => {
     );
   }
 
-  if (!authenticated) {
-    return (
-      <Container maxWidth="sm" sx={{ mt: 8 }}>
-        <Paper sx={{ p: 4 }}>
-          <Typography variant="h4" gutterBottom align="center">
-            {showPasswordReset ? 'Reset Password' : 'Admin Login'}
-          </Typography>
-
-          {showPasswordReset ? (
-            <PasswordResetForm
-              onCancel={() => setShowPasswordReset(false)}
-              onResetComplete={() => setShowPasswordReset(false)}
-            />
-          ) : (
-            <LoginForm
-              onLoginSuccess={handleLoginSuccess}
-              onForgotPassword={() => setShowPasswordReset(true)}
-            />
-          )}
-        </Paper>
-      </Container>
-    );
-  }
-
   return (
     <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h3" component="h1">
           Create New Blog Post
         </Typography>
-        <Button variant="outlined" onClick={handleLogout}>
-          Log Out
-        </Button>
       </Box>
 
       {error && (
@@ -317,4 +278,4 @@ const AdminPage = () => {
   );
 };
 
-export default AdminPage;
+export default CreatePostPage;
