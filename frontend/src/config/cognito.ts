@@ -7,6 +7,15 @@ export const cognitoConfig = {
   region: import.meta.env.VITE_AWS_REGION || 'us-east-1',
 };
 
+// Debug: Log config to verify env vars are loaded
+console.log('Cognito Config:', {
+  userPoolId: cognitoConfig.userPoolId,
+  clientId: cognitoConfig.clientId,
+  region: cognitoConfig.region,
+  hasUserPoolId: !!cognitoConfig.userPoolId,
+  hasClientId: !!cognitoConfig.clientId,
+});
+
 // Configure Amplify
 Amplify.configure({
   Auth: {

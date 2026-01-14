@@ -44,6 +44,9 @@ export default function LoginForm({ onLoginSuccess, onForgotPassword }: LoginFor
       await signIn({ username: email, password });
       onLoginSuccess();
     } catch (err: any) {
+      console.error('Login error:', err);
+      console.error('Error name:', err.name);
+      console.error('Error message:', err.message);
       setError(mapAuthError(err));
     } finally {
       setLoading(false);
