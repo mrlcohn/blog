@@ -1,15 +1,14 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Container, Paper, Typography } from '@mui/material';
 import LoginForm from '../components/LoginForm';
 import PasswordResetForm from '../components/PasswordResetForm';
 
 const LoginPage = () => {
-  const navigate = useNavigate();
   const [showPasswordReset, setShowPasswordReset] = useState(false);
 
   const handleLoginSuccess = () => {
-    navigate('/create');
+    // Force a page reload to ensure auth state is fully updated
+    window.location.href = '/create';
   };
 
   return (
