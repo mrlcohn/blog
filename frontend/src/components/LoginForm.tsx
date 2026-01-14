@@ -13,22 +13,6 @@ interface LoginFormProps {
   onForgotPassword: () => void;
 }
 
-const mapAuthError = (err: any): string => {
-  switch (err.name) {
-    case 'UserNotFoundException':
-    case 'NotAuthorizedException':
-      return 'Invalid email or password';
-    case 'UserNotConfirmedException':
-      return 'Please verify your email address';
-    case 'PasswordResetRequiredException':
-      return 'Password reset required. Please use "Forgot Password?"';
-    case 'TooManyRequestsException':
-      return 'Too many attempts. Please try again later';
-    default:
-      return 'Login failed. Please try again.';
-  }
-};
-
 export default function LoginForm({ onLoginSuccess, onForgotPassword }: LoginFormProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -44,10 +28,14 @@ export default function LoginForm({ onLoginSuccess, onForgotPassword }: LoginFor
       await signIn({ username: email, password });
       onLoginSuccess();
     } catch (err: any) {
-      console.error('Login error:', err);
+      console.error('Login error - Full error object:', err);
       console.error('Error name:', err.name);
       console.error('Error message:', err.message);
-      setError(mapAuthError(err));
+      console.error('Error code:', err.code);
+      console.error('Error underlyingError:', err.underlyingError);
+
+      // Show the actual error message in UI for debugging
+      setError(`${err.name || 'Error'}: ${err.message || 'Login failed'}`);
     } finally {
       setLoading(false);
     }
