@@ -57,25 +57,6 @@ resource "aws_cognito_user_pool_client" "blog_admin_client" {
   name         = "blog-admin-web-client"
   user_pool_id = aws_cognito_user_pool.blog_admin.id
 
-  # OAuth settings
-  allowed_oauth_flows_user_pool_client = true
-  allowed_oauth_flows                  = ["code", "implicit"]
-  allowed_oauth_scopes                 = ["email", "openid", "profile"]
-
-  callback_urls = [
-    "https://${var.domain_name}/admin",
-    "https://${var.domain_name}/admin/callback",
-    "http://localhost:5173/admin",
-    "http://localhost:5173/admin/callback"
-  ]
-
-  logout_urls = [
-    "https://${var.domain_name}",
-    "http://localhost:5173"
-  ]
-
-  supported_identity_providers = ["COGNITO"]
-
   # Token validity
   id_token_validity      = 60
   access_token_validity  = 60
@@ -90,11 +71,11 @@ resource "aws_cognito_user_pool_client" "blog_admin_client" {
   # Prevent client secret for public clients (SPA)
   generate_secret = false
 
-  # Auth flows
+  # Auth flows for custom login UI
   explicit_auth_flows = [
-    "ALLOW_USER_SRP_AUTH",
-    "ALLOW_REFRESH_TOKEN_AUTH",
-    "ALLOW_USER_PASSWORD_AUTH"
+    "ALLOW_USER_SRP_AUTH",        # Required for Amplify signIn
+    "ALLOW_REFRESH_TOKEN_AUTH",   # Required for token refresh
+    "ALLOW_USER_PASSWORD_AUTH"    # Optional fallback
   ]
 }
 

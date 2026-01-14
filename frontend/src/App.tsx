@@ -5,7 +5,6 @@ import HomePage from './pages/HomePage';
 import BlogPostPage from './pages/BlogPostPage';
 import AboutPage from './pages/AboutPage';
 import AdminPage from './pages/AdminPage';
-import AdminCallbackPage from './pages/AdminCallbackPage';
 
 const theme = createTheme({
   palette: {
@@ -45,7 +44,6 @@ function App() {
           <Route path="/posts/:id" element={<BlogPostPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/admin" element={<AdminPage />} />
-          <Route path="/admin/callback" element={<AdminCallbackPage />} />
         </Routes>
       </Router>
     </ThemeProvider>

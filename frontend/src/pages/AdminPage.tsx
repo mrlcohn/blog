@@ -17,7 +17,8 @@ import {
   CircularProgress,
 } from '@mui/material';
 import { isAuthenticated, getAuthHeader, clearTokens } from '../utils/auth';
-import { getAuthUrl } from '../config/cognito';
+import LoginForm from '../components/LoginForm';
+import PasswordResetForm from '../components/PasswordResetForm';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -39,6 +40,7 @@ const AdminPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [tagInput, setTagInput] = useState('');
+  const [showPasswordReset, setShowPasswordReset] = useState(false);
 
   const [formData, setFormData] = useState<BlogFormData>({
     slug: '',
@@ -52,22 +54,23 @@ const AdminPage = () => {
 
   useEffect(() => {
     // Check authentication status
-    if (!isAuthenticated()) {
-      setAuthenticated(false);
+    const checkAuth = async () => {
+      setLoading(true);
+      const authed = await isAuthenticated();
+      setAuthenticated(authed);
       setLoading(false);
-    } else {
-      setAuthenticated(true);
-      setLoading(false);
-    }
+    };
+    checkAuth();
   }, []);
 
-  const handleLogin = () => {
-    window.location.href = getAuthUrl('login');
+  const handleLoginSuccess = () => {
+    setAuthenticated(true);
+    setShowPasswordReset(false);
   };
 
-  const handleLogout = () => {
-    clearTokens();
-    window.location.href = getAuthUrl('logout');
+  const handleLogout = async () => {
+    await clearTokens();
+    setAuthenticated(false);
   };
 
   const handleInputChange = (field: keyof BlogFormData, value: string | string[]) => {
@@ -108,7 +111,7 @@ const AdminPage = () => {
     setSubmitting(true);
 
     try {
-      const authHeader = getAuthHeader();
+      const authHeader = await getAuthHeader();
       if (!authHeader) {
         throw new Error('Not authenticated');
       }
@@ -163,16 +166,22 @@ const AdminPage = () => {
   if (!authenticated) {
     return (
       <Container maxWidth="sm" sx={{ mt: 8 }}>
-        <Paper sx={{ p: 4, textAlign: 'center' }}>
-          <Typography variant="h4" gutterBottom>
-            Admin Login Required
+        <Paper sx={{ p: 4 }}>
+          <Typography variant="h4" gutterBottom align="center">
+            {showPasswordReset ? 'Reset Password' : 'Admin Login'}
           </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-            Please log in to access the blog admin panel.
-          </Typography>
-          <Button variant="contained" size="large" onClick={handleLogin}>
-            Log In with Cognito
-          </Button>
+
+          {showPasswordReset ? (
+            <PasswordResetForm
+              onCancel={() => setShowPasswordReset(false)}
+              onResetComplete={() => setShowPasswordReset(false)}
+            />
+          ) : (
+            <LoginForm
+              onLoginSuccess={handleLoginSuccess}
+              onForgotPassword={() => setShowPasswordReset(true)}
+            />
+          )}
         </Paper>
       </Container>
     );
