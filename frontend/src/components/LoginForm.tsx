@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { signIn, fetchAuthSession } from 'aws-amplify/auth';
+import { signIn } from 'aws-amplify/auth';
 import {
   Box,
   TextField,
@@ -11,9 +11,10 @@ import {
 interface LoginFormProps {
   onLoginSuccess: () => void;
   onForgotPassword: () => void;
+  onNewPasswordRequired: () => void;
 }
 
-export default function LoginForm({ onLoginSuccess, onForgotPassword }: LoginFormProps) {
+export default function LoginForm({ onLoginSuccess, onForgotPassword, onNewPasswordRequired }: LoginFormProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -25,29 +26,16 @@ export default function LoginForm({ onLoginSuccess, onForgotPassword }: LoginFor
     setError(null);
 
     try {
-      console.log('DEBUG: Starting signIn...');
       const signInResult = await signIn({ username: email, password });
-      console.log('DEBUG: signIn result:', signInResult);
-      console.log('DEBUG: signIn isSignedIn:', signInResult.isSignedIn);
-      console.log('DEBUG: signIn nextStep:', signInResult.nextStep);
 
-      console.log('DEBUG: Fetching auth session...');
-      const session = await fetchAuthSession();
-      console.log('DEBUG: Session result:', session);
-      console.log('DEBUG: Session tokens:', session.tokens);
-      console.log('DEBUG: Has idToken:', !!session.tokens?.idToken);
-
-      console.log('DEBUG: localStorage keys:', Object.keys(localStorage));
-      console.log('DEBUG: localStorage contents:', JSON.stringify(localStorage, null, 2));
-
-      // Use alert to pause and see debug info before redirect
-      alert(`Login result:\n\nisSignedIn: ${signInResult.isSignedIn}\nnextStep: ${JSON.stringify(signInResult.nextStep)}\nHas tokens: ${!!session.tokens}\nlocalStorage keys: ${Object.keys(localStorage).join(', ')}`);
-
-      console.log('DEBUG: Calling onLoginSuccess...');
-      onLoginSuccess();
+      if (signInResult.isSignedIn) {
+        onLoginSuccess();
+      } else if (signInResult.nextStep.signInStep === 'CONFIRM_SIGN_IN_WITH_NEW_PASSWORD_REQUIRED') {
+        onNewPasswordRequired();
+      } else {
+        setError(`Unexpected sign-in step: ${signInResult.nextStep.signInStep}`);
+      }
     } catch (err: any) {
-      console.error('DEBUG: Login error:', err);
-      // Map common errors to user-friendly messages
       let errorMessage = 'Invalid email or password';
 
       if (err.name === 'UserNotConfirmedException') {
