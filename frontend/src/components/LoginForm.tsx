@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { signIn } from 'aws-amplify/auth';
+import { signIn, fetchAuthSession } from 'aws-amplify/auth';
 import {
   Box,
   TextField,
@@ -26,6 +26,8 @@ export default function LoginForm({ onLoginSuccess, onForgotPassword }: LoginFor
 
     try {
       await signIn({ username: email, password });
+      // Fetch session to ensure tokens are persisted to storage before redirecting
+      await fetchAuthSession();
       onLoginSuccess();
     } catch (err: any) {
       // Map common errors to user-friendly messages
