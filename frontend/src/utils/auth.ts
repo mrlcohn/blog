@@ -1,10 +1,12 @@
 // Auth utility functions using AWS Amplify
-import { getCurrentUser, fetchAuthSession, signOut } from 'aws-amplify/auth';
+import { fetchAuthSession, signOut } from 'aws-amplify/auth';
 
 export const isAuthenticated = async (): Promise<boolean> => {
   try {
-    await getCurrentUser();
-    return true;
+    // fetchAuthSession waits for Amplify to fully hydrate tokens from storage
+    // This is more reliable than getCurrentUser for checking auth state
+    const session = await fetchAuthSession();
+    return !!session.tokens;
   } catch {
     return false;
   }
