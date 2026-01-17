@@ -41,7 +41,7 @@ export default function LoginForm({ onLoginSuccess, onForgotPassword }: LoginFor
       console.log('DEBUG: localStorage contents:', JSON.stringify(localStorage, null, 2));
 
       // Use alert to pause and see debug info before redirect
-      alert(`Login complete!\n\nisSignedIn: ${signInResult.isSignedIn}\nHas tokens: ${!!session.tokens}\nlocalStorage keys: ${Object.keys(localStorage).join(', ')}`);
+      alert(`Login result:\n\nisSignedIn: ${signInResult.isSignedIn}\nnextStep: ${JSON.stringify(signInResult.nextStep)}\nHas tokens: ${!!session.tokens}\nlocalStorage keys: ${Object.keys(localStorage).join(', ')}`);
 
       console.log('DEBUG: Calling onLoginSuccess...');
       onLoginSuccess();
