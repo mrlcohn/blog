@@ -1,5 +1,7 @@
 // Cognito configuration with AWS Amplify
 import { Amplify } from 'aws-amplify';
+import { cognitoUserPoolsTokenProvider } from 'aws-amplify/auth/cognito';
+import { defaultStorage } from 'aws-amplify/utils';
 
 export const cognitoConfig = {
   userPoolId: import.meta.env.VITE_COGNITO_USER_POOL_ID || '',
@@ -13,9 +15,9 @@ Amplify.configure({
     Cognito: {
       userPoolId: cognitoConfig.userPoolId,
       userPoolClientId: cognitoConfig.clientId,
-      loginWith: {
-        email: true,
-      },
     },
   },
 });
+
+// Explicitly set token storage to use localStorage (default)
+cognitoUserPoolsTokenProvider.setKeyValueStorage(defaultStorage);
