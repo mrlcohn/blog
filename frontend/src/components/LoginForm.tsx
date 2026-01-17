@@ -25,11 +25,25 @@ export default function LoginForm({ onLoginSuccess, onForgotPassword }: LoginFor
     setError(null);
 
     try {
-      await signIn({ username: email, password });
-      // Fetch session to ensure tokens are persisted to storage before redirecting
-      await fetchAuthSession();
+      console.log('DEBUG: Starting signIn...');
+      const signInResult = await signIn({ username: email, password });
+      console.log('DEBUG: signIn result:', signInResult);
+      console.log('DEBUG: signIn isSignedIn:', signInResult.isSignedIn);
+      console.log('DEBUG: signIn nextStep:', signInResult.nextStep);
+
+      console.log('DEBUG: Fetching auth session...');
+      const session = await fetchAuthSession();
+      console.log('DEBUG: Session result:', session);
+      console.log('DEBUG: Session tokens:', session.tokens);
+      console.log('DEBUG: Has idToken:', !!session.tokens?.idToken);
+
+      console.log('DEBUG: localStorage keys:', Object.keys(localStorage));
+      console.log('DEBUG: localStorage contents:', JSON.stringify(localStorage, null, 2));
+
+      console.log('DEBUG: Calling onLoginSuccess...');
       onLoginSuccess();
     } catch (err: any) {
+      console.error('DEBUG: Login error:', err);
       // Map common errors to user-friendly messages
       let errorMessage = 'Invalid email or password';
 
