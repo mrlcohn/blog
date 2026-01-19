@@ -17,7 +17,8 @@ import {
   CircularProgress,
 } from '@mui/material';
 import { isAuthenticated, getAuthHeader } from '../utils/auth';
-import { fetchAdminPosts, updateBlogPost, BlogPost } from '../services/api';
+import { fetchAdminPosts, updateBlogPost } from '../services/api';
+import type { BlogPost } from '../services/api';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 

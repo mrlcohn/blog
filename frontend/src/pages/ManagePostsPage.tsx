@@ -19,7 +19,8 @@ import {
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import { isAuthenticated } from '../utils/auth';
-import { fetchAdminPosts, BlogPost } from '../services/api';
+import { fetchAdminPosts } from '../services/api';
+import type { BlogPost } from '../services/api';
 
 const ManagePostsPage = () => {
   const navigate = useNavigate();
