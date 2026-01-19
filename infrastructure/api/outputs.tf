@@ -20,6 +20,11 @@ output "api_bucket_arn" {
   value       = aws_s3_bucket.api_content.arn
 }
 
+output "api_bucket_regional_domain_name" {
+  description = "Regional domain name of the S3 bucket for API content"
+  value       = aws_s3_bucket.api_content.bucket_regional_domain_name
+}
+
 # API Gateway outputs
 output "api_gateway_id" {
   description = "ID of the API Gateway"

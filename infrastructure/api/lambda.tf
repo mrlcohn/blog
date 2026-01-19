@@ -205,3 +205,58 @@ resource "aws_lambda_function" "update_blog_post" {
     Name = "UpdateBlogPost Lambda"
   }
 }
+
+# Lambda function: UpdateAbout
+data "archive_file" "update_about" {
+  type        = "zip"
+  source_dir  = "${path.module}/../../api/lambdas/update_about"
+  output_path = "${path.module}/lambda_zips/update_about.zip"
+}
+
+resource "aws_lambda_function" "update_about" {
+  filename         = data.archive_file.update_about.output_path
+  function_name    = "UpdateAbout"
+  role            = aws_iam_role.lambda_exec.arn
+  handler         = "lambda_function.lambda_handler"
+  source_code_hash = data.archive_file.update_about.output_base64sha256
+  runtime         = "python3.12"
+  timeout         = 10
+
+  environment {
+    variables = {
+      S3_BUCKET = aws_s3_bucket.api_content.bucket
+    }
+  }
+
+  tags = {
+    Name = "UpdateAbout Lambda"
+  }
+}
+
+# Lambda function: UploadImage
+data "archive_file" "upload_image" {
+  type        = "zip"
+  source_dir  = "${path.module}/../../api/lambdas/upload_image"
+  output_path = "${path.module}/lambda_zips/upload_image.zip"
+}
+
+resource "aws_lambda_function" "upload_image" {
+  filename         = data.archive_file.upload_image.output_path
+  function_name    = "UploadImage"
+  role            = aws_iam_role.lambda_exec.arn
+  handler         = "lambda_function.lambda_handler"
+  source_code_hash = data.archive_file.upload_image.output_base64sha256
+  runtime         = "python3.12"
+  timeout         = 10
+
+  environment {
+    variables = {
+      S3_BUCKET   = aws_s3_bucket.api_content.bucket
+      DOMAIN_NAME = var.domain_name
+    }
+  }
+
+  tags = {
+    Name = "UploadImage Lambda"
+  }
+}

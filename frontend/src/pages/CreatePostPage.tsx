@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   Container,
@@ -16,8 +16,9 @@ import {
   MenuItem,
   CircularProgress,
 } from '@mui/material';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { isAuthenticated, getAuthHeader } from '../utils/auth';
-import { fetchAdminPosts, updateBlogPost } from '../services/api';
+import { fetchAdminPosts, updateBlogPost, uploadImage } from '../services/api';
 import type { BlogPost } from '../services/api';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
@@ -30,6 +31,7 @@ interface BlogFormData {
   content: string;
   tags: string[];
   status: 'draft' | 'published';
+  imageKey: string;
 }
 
 const generateSlugFromTitle = (title: string): string => {
@@ -45,9 +47,11 @@ const CreatePostPage = () => {
   const navigate = useNavigate();
   const { slug: editSlug } = useParams<{ slug: string }>();
   const isEditMode = Boolean(editSlug);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [tagInput, setTagInput] = useState('');
@@ -60,6 +64,7 @@ const CreatePostPage = () => {
     content: '',
     tags: [],
     status: 'draft',
+    imageKey: '',
   });
 
   useEffect(() => {
@@ -84,6 +89,7 @@ const CreatePostPage = () => {
               content: post.content || '',
               tags: post.tags,
               status: post.status || 'draft',
+              imageKey: post.imageKey || '',
             });
           } else {
             setError('Post not found');
@@ -126,6 +132,45 @@ const CreatePostPage = () => {
     }));
   };
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      setError('Invalid file type. Please upload a JPEG, PNG, GIF, or WebP image.');
+      return;
+    }
+
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      setError('File too large. Maximum size is 5MB.');
+      return;
+    }
+
+    setError(null);
+    setUploading(true);
+
+    try {
+      const imageUrl = await uploadImage(file, 'posts');
+      setFormData(prev => ({ ...prev, imageKey: imageUrl }));
+      setSuccess('Image uploaded successfully!');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to upload image');
+    } finally {
+      setUploading(false);
+      // Reset the file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setFormData(prev => ({ ...prev, imageKey: '' }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -147,6 +192,7 @@ const CreatePostPage = () => {
           content: formData.content,
           tags: formData.tags,
           status: formData.status,
+          imageKey: formData.imageKey || undefined,
         });
         setSuccess(`Blog post "${formData.title}" updated successfully as ${result.status}!`);
       } else {
@@ -157,7 +203,10 @@ const CreatePostPage = () => {
             'Content-Type': 'application/json',
             'Authorization': authHeader,
           },
-          body: JSON.stringify(formData),
+          body: JSON.stringify({
+            ...formData,
+            imageKey: formData.imageKey || undefined,
+          }),
         });
 
         if (!response.ok) {
@@ -177,6 +226,7 @@ const CreatePostPage = () => {
           content: '',
           tags: [],
           status: 'draft',
+          imageKey: '',
         });
       }
 
@@ -245,6 +295,72 @@ const CreatePostPage = () => {
               onChange={(e) => handleInputChange('author', e.target.value)}
             />
 
+            <Box>
+              <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+                Featured Image (Optional)
+              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, flexWrap: 'wrap' }}>
+                {formData.imageKey && (
+                  <Box sx={{ position: 'relative' }}>
+                    <Box
+                      component="img"
+                      src={formData.imageKey}
+                      alt="Featured image preview"
+                      sx={{
+                        maxWidth: 200,
+                        maxHeight: 150,
+                        borderRadius: 1,
+                        border: '1px solid',
+                        borderColor: 'divider',
+                        objectFit: 'cover',
+                      }}
+                    />
+                    <Button
+                      size="small"
+                      color="error"
+                      onClick={handleRemoveImage}
+                      sx={{ position: 'absolute', top: 4, right: 4, minWidth: 'auto', p: 0.5 }}
+                    >
+                      X
+                    </Button>
+                  </Box>
+                )}
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/gif,image/webp"
+                    onChange={handleImageUpload}
+                    style={{ display: 'none' }}
+                    id="post-image-upload"
+                  />
+                  <label htmlFor="post-image-upload">
+                    <Button
+                      variant="outlined"
+                      component="span"
+                      startIcon={uploading ? <CircularProgress size={16} /> : <CloudUploadIcon />}
+                      disabled={uploading}
+                    >
+                      {uploading ? 'Uploading...' : 'Upload Image'}
+                    </Button>
+                  </label>
+                  <Typography variant="caption" color="text.secondary">
+                    JPEG, PNG, GIF, or WebP. Max 5MB.
+                  </Typography>
+                </Box>
+              </Box>
+              {!formData.imageKey && (
+                <TextField
+                  fullWidth
+                  size="small"
+                  placeholder="Or paste an image URL..."
+                  value={formData.imageKey}
+                  onChange={(e) => handleInputChange('imageKey', e.target.value)}
+                  sx={{ mt: 2 }}
+                />
+              )}
+            </Box>
+
             <TextField
               label="Summary"
               required
@@ -307,7 +423,7 @@ const CreatePostPage = () => {
               type="submit"
               variant="contained"
               size="large"
-              disabled={submitting}
+              disabled={submitting || uploading}
             >
               {submitting
                 ? (isEditMode ? 'Updating...' : 'Creating...')

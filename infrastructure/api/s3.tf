@@ -36,3 +36,31 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "api_content" {
     }
   }
 }
+
+# Bucket policy to allow CloudFront OAC access for /content/* path
+resource "aws_s3_bucket_policy" "api_content" {
+  count  = var.cloudfront_distribution_arn != "" ? 1 : 0
+  bucket = aws_s3_bucket.api_content.id
+
+  depends_on = [aws_s3_bucket_public_access_block.api_content]
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "AllowCloudFrontServicePrincipal"
+        Effect = "Allow"
+        Principal = {
+          Service = "cloudfront.amazonaws.com"
+        }
+        Action   = "s3:GetObject"
+        Resource = "${aws_s3_bucket.api_content.arn}/content/*"
+        Condition = {
+          StringEquals = {
+            "AWS:SourceArn" = var.cloudfront_distribution_arn
+          }
+        }
+      }
+    ]
+  })
+}

@@ -2,21 +2,31 @@ import { Typography, Box, CircularProgress } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import BlogPostCard from '../components/BlogPostCard';
-import { fetchBlogCards, type BlogCardData } from '../services/api';
+import { fetchBlogCards, fetchAbout, type BlogCardData, type AboutData } from '../services/api';
 
 function HomePage() {
   const navigate = useNavigate();
   const [posts, setPosts] = useState<BlogCardData[]>([]);
+  const [aboutData, setAboutData] = useState<AboutData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function loadPosts() {
-      const data = await fetchBlogCards();
-      setPosts(data);
+    async function loadData() {
+      const [postsData, about] = await Promise.all([
+        fetchBlogCards(),
+        fetchAbout()
+      ]);
+      setPosts(postsData);
+      setAboutData(about);
       setLoading(false);
     }
-    loadPosts();
+    loadData();
   }, []);
+
+  const displayName = aboutData?.name || 'Your Name';
+  const displayBio = aboutData?.bio || 'Software engineer passionate about web development and cloud technologies.';
+  const initials = displayName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+
   return (
     <Box sx={{ minHeight: '100vh', py: 4 }}>
       <Box sx={{ maxWidth: '1100px', mx: 'auto', px: { xs: 2, sm: 3 } }}>
@@ -43,28 +53,43 @@ function HomePage() {
               gap: 1.5,
             }}
           >
-            <Box
-              sx={{
-                width: 80,
-                height: 80,
-                borderRadius: '50%',
-                backgroundColor: 'secondary.light',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-              }}
-            >
-              <Typography variant="h4" sx={{ color: 'white' }}>
-                LW
-              </Typography>
-            </Box>
+            {aboutData?.imageUrl ? (
+              <Box
+                component="img"
+                src={aboutData.imageUrl}
+                alt={displayName}
+                sx={{
+                  width: 80,
+                  height: 80,
+                  borderRadius: '50%',
+                  objectFit: 'cover',
+                  flexShrink: 0,
+                }}
+              />
+            ) : (
+              <Box
+                sx={{
+                  width: 80,
+                  height: 80,
+                  borderRadius: '50%',
+                  backgroundColor: 'secondary.light',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}
+              >
+                <Typography variant="h4" sx={{ color: 'white' }}>
+                  {initials}
+                </Typography>
+              </Box>
+            )}
             <Box sx={{ textAlign: 'center' }}>
               <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 0.5 }}>
-                Your Name
+                {displayName}
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5, lineHeight: 1.5 }}>
-                Software engineer passionate about web development and cloud technologies.
+                {displayBio}
               </Typography>
               <Typography
                 variant="body2"

@@ -37,6 +37,9 @@ export interface AboutData {
   bio: string;
   social?: Record<string, string>;
   content: string;
+  imageUrl?: string;
+  updatedAt?: string;
+  updatedBy?: string;
 }
 
 /**
@@ -140,6 +143,7 @@ export async function updateBlogPost(slug: string, data: {
   content: string;
   tags: string[];
   status: 'draft' | 'published';
+  imageKey?: string;
 }): Promise<{ slug: string; status: string; updatedAt: string }> {
   const authHeader = await getAuthHeader();
   if (!authHeader) {
@@ -161,4 +165,89 @@ export async function updateBlogPost(slug: string, data: {
   }
 
   return await response.json();
+}
+
+/**
+ * Update about me page content (requires authentication)
+ */
+export async function updateAbout(data: {
+  name: string;
+  bio: string;
+  content: string;
+  imageUrl?: string;
+}): Promise<{ message: string; updatedAt: string }> {
+  const authHeader = await getAuthHeader();
+  if (!authHeader) {
+    throw new Error('Not authenticated');
+  }
+
+  const response = await fetch(`${API_BASE_URL}/about`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': authHeader,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Failed to update about page');
+  }
+
+  return await response.json();
+}
+
+/**
+ * Get a pre-signed URL for uploading an image (requires authentication)
+ */
+export async function getUploadUrl(contentType: string, category: 'about' | 'posts' = 'about'): Promise<{
+  uploadUrl: string;
+  imageUrl: string;
+  key: string;
+}> {
+  const authHeader = await getAuthHeader();
+  if (!authHeader) {
+    throw new Error('Not authenticated');
+  }
+
+  const response = await fetch(`${API_BASE_URL}/upload`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': authHeader,
+    },
+    body: JSON.stringify({ contentType, category }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Failed to get upload URL');
+  }
+
+  return await response.json();
+}
+
+/**
+ * Upload an image file to S3 using a pre-signed URL
+ */
+export async function uploadImage(file: File, category: 'about' | 'posts' = 'about'): Promise<string> {
+  // Get the pre-signed URL
+  const { uploadUrl, imageUrl } = await getUploadUrl(file.type, category);
+
+  // Upload the file directly to S3
+  const uploadResponse = await fetch(uploadUrl, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': file.type,
+    },
+    body: file,
+  });
+
+  if (!uploadResponse.ok) {
+    throw new Error('Failed to upload image');
+  }
+
+  // Return the public URL (served via CloudFront)
+  return imageUrl;
 }

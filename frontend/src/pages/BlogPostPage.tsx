@@ -1,6 +1,8 @@
 import { useParams } from 'react-router-dom';
 import { Typography, Box, Chip, Paper, CircularProgress } from '@mui/material';
 import { useEffect, useState } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { fetchBlogPost, type BlogPost } from '../services/api';
 
 function BlogPostPage() {
@@ -82,13 +84,50 @@ function BlogPostPage() {
             ))}
           </Box>
 
-          <Typography
-            variant="body1"
-            component="div"
+          {post.imageKey && (
+            <Box
+              component="img"
+              src={post.imageKey}
+              alt={post.title}
+              sx={{
+                width: '100%',
+                maxHeight: 400,
+                objectFit: 'cover',
+                borderRadius: 2,
+                mb: 4,
+              }}
+            />
+          )}
+
+          <Box
             sx={{
-              whiteSpace: 'pre-wrap',
               lineHeight: 1.8,
               color: 'text.primary',
+              '& h1, & h2, & h3, & h4, & h5, & h6': {
+                fontWeight: 600,
+                color: 'primary.main',
+                mt: 4,
+                mb: 2,
+              },
+              '& h1': { fontSize: '1.75rem' },
+              '& h2': { fontSize: '1.5rem' },
+              '& h3': { fontSize: '1.25rem' },
+              '& p': {
+                lineHeight: 1.8,
+                mb: 2,
+              },
+              '& ul, & ol': {
+                pl: 3,
+                mb: 2,
+              },
+              '& li': {
+                lineHeight: 1.8,
+                mb: 0.5,
+              },
+              '& a': {
+                color: 'primary.main',
+                textDecoration: 'underline',
+              },
               '& code': {
                 backgroundColor: 'rgba(0, 0, 0, 0.05)',
                 padding: '2px 6px',
@@ -96,10 +135,56 @@ function BlogPostPage() {
                 fontFamily: 'monospace',
                 fontSize: '0.9em',
               },
+              '& pre': {
+                backgroundColor: 'rgba(0, 0, 0, 0.05)',
+                padding: 2,
+                borderRadius: 1,
+                overflow: 'auto',
+                '& code': {
+                  backgroundColor: 'transparent',
+                  padding: 0,
+                },
+              },
+              '& blockquote': {
+                borderLeft: '4px solid',
+                borderColor: 'primary.main',
+                pl: 2,
+                ml: 0,
+                fontStyle: 'italic',
+                color: 'text.secondary',
+              },
+              '& table': {
+                borderCollapse: 'collapse',
+                width: '100%',
+                mb: 2,
+              },
+              '& th, & td': {
+                border: '1px solid',
+                borderColor: 'divider',
+                padding: 1,
+                textAlign: 'left',
+              },
+              '& th': {
+                backgroundColor: 'rgba(0, 0, 0, 0.02)',
+                fontWeight: 600,
+              },
+              '& img': {
+                maxWidth: '100%',
+                height: 'auto',
+                borderRadius: 1,
+              },
+              '& hr': {
+                border: 'none',
+                borderTop: '1px solid',
+                borderColor: 'divider',
+                my: 3,
+              },
             }}
           >
-            {post.content}
-          </Typography>
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {post.content || ''}
+            </ReactMarkdown>
+          </Box>
         </Paper>
       </Box>
     </Box>

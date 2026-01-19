@@ -237,5 +237,53 @@ resource "aws_lambda_permission" "api_gw_update_blog_post" {
   source_arn    = "${aws_apigatewayv2_api.blog_api.execution_arn}/*/*"
 }
 
+# Lambda Integration: UpdateAbout (Protected)
+resource "aws_apigatewayv2_integration" "update_about" {
+  api_id           = aws_apigatewayv2_api.blog_api.id
+  integration_type = "AWS_PROXY"
+  integration_uri  = aws_lambda_function.update_about.invoke_arn
+  payload_format_version = "2.0"
+}
+
+resource "aws_apigatewayv2_route" "update_about" {
+  api_id             = aws_apigatewayv2_api.blog_api.id
+  route_key          = "PUT /about"
+  target             = "integrations/${aws_apigatewayv2_integration.update_about.id}"
+  authorizer_id      = aws_apigatewayv2_authorizer.cognito_authorizer.id
+  authorization_type = "CUSTOM"
+}
+
+resource "aws_lambda_permission" "api_gw_update_about" {
+  statement_id  = "AllowAPIGatewayInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.update_about.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_apigatewayv2_api.blog_api.execution_arn}/*/*"
+}
+
+# Lambda Integration: UploadImage (Protected)
+resource "aws_apigatewayv2_integration" "upload_image" {
+  api_id           = aws_apigatewayv2_api.blog_api.id
+  integration_type = "AWS_PROXY"
+  integration_uri  = aws_lambda_function.upload_image.invoke_arn
+  payload_format_version = "2.0"
+}
+
+resource "aws_apigatewayv2_route" "upload_image" {
+  api_id             = aws_apigatewayv2_api.blog_api.id
+  route_key          = "POST /upload"
+  target             = "integrations/${aws_apigatewayv2_integration.upload_image.id}"
+  authorizer_id      = aws_apigatewayv2_authorizer.cognito_authorizer.id
+  authorization_type = "CUSTOM"
+}
+
+resource "aws_lambda_permission" "api_gw_upload_image" {
+  statement_id  = "AllowAPIGatewayInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.upload_image.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_apigatewayv2_api.blog_api.execution_arn}/*/*"
+}
+
 # Custom domain for API (api.yourdomain.com or yourdomain.com/api)
 # We'll add this to CloudFront as a behavior instead

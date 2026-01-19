@@ -18,3 +18,9 @@ variable "route53_zone_name" {
   description = "Route53 hosted zone name (e.g., example.com)"
   type        = string
 }
+
+variable "cloudfront_distribution_arn" {
+  description = "ARN of the CloudFront distribution (for S3 bucket policy)"
+  type        = string
+  default     = ""
+}

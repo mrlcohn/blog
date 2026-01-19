@@ -1,7 +1,17 @@
-# CloudFront Origin Access Control
+# CloudFront Origin Access Control for blog bucket
 resource "aws_cloudfront_origin_access_control" "blog" {
   name                              = "blog-oac"
   description                       = "OAC for blog S3 bucket"
+  origin_access_control_origin_type = "s3"
+  signing_behavior                  = "always"
+  signing_protocol                  = "sigv4"
+}
+
+# CloudFront Origin Access Control for API content bucket
+resource "aws_cloudfront_origin_access_control" "api_content" {
+  count                             = var.api_content_bucket_name != "" ? 1 : 0
+  name                              = "api-content-oac"
+  description                       = "OAC for API content S3 bucket"
   origin_access_control_origin_type = "s3"
   signing_behavior                  = "always"
   signing_protocol                  = "sigv4"
@@ -35,6 +45,16 @@ resource "aws_cloudfront_distribution" "blog" {
         origin_protocol_policy = "https-only"
         origin_ssl_protocols   = ["TLSv1.2"]
       }
+    }
+  }
+
+  # API content S3 bucket as origin for /content/* requests (images, etc.)
+  dynamic "origin" {
+    for_each = var.api_content_bucket_name != "" ? [1] : 0
+    content {
+      domain_name              = var.api_content_bucket_regional_domain_name
+      origin_id                = "S3-APIContent"
+      origin_access_control_id = aws_cloudfront_origin_access_control.api_content[0].id
     }
   }
 
@@ -79,6 +99,30 @@ resource "aws_cloudfront_distribution" "blog" {
       min_ttl                = 0
       default_ttl            = 0
       max_ttl                = 0
+      compress               = true
+    }
+  }
+
+  # Cache behavior for content (images, etc.) from API content bucket
+  dynamic "ordered_cache_behavior" {
+    for_each = var.api_content_bucket_name != "" ? [1] : []
+    content {
+      path_pattern     = "/content/*"
+      allowed_methods  = ["GET", "HEAD", "OPTIONS"]
+      cached_methods   = ["GET", "HEAD"]
+      target_origin_id = "S3-APIContent"
+
+      forwarded_values {
+        query_string = false
+        cookies {
+          forward = "none"
+        }
+      }
+
+      viewer_protocol_policy = "redirect-to-https"
+      min_ttl                = 0
+      default_ttl            = 86400   # 24 hours
+      max_ttl                = 604800  # 7 days
       compress               = true
     }
   }

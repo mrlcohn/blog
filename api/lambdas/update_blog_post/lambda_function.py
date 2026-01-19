@@ -68,6 +68,7 @@ def lambda_handler(event, context):
         summary = body.get('summary', existing_item.get('summary'))
         content = body.get('content')
         tags = body.get('tags', existing_item.get('tags', []))
+        image_key = body.get('imageKey', existing_item.get('imageKey', ''))
         status = body.get('status', existing_item.get('status', 'draft'))
 
         # Validate required fields
@@ -110,6 +111,7 @@ def lambda_handler(event, context):
                 author = :author,
                 summary = :summary,
                 tags = :tags,
+                imageKey = :imageKey,
                 #status = :status,
                 updatedAt = :updatedAt,
                 updatedBy = :updatedBy,
@@ -131,6 +133,7 @@ def lambda_handler(event, context):
                 ':author': author,
                 ':summary': summary,
                 ':tags': tags,
+                ':imageKey': image_key,
                 ':status': status,
                 ':updatedAt': timestamp,
                 ':updatedBy': user_email,

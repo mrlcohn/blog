@@ -24,3 +24,8 @@ output "blog_url" {
   description = "Blog URL with custom domain"
   value       = "https://${var.domain_name}"
 }
+
+output "cloudfront_distribution_arn" {
+  description = "CloudFront distribution ARN"
+  value       = aws_cloudfront_distribution.blog.arn
+}
