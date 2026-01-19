@@ -2,6 +2,8 @@
  * API service for fetching blog data from the backend
  */
 
+import { getAuthHeader } from '../utils/auth';
+
 const API_BASE_URL = '/api';
 
 export interface BlogPost {
@@ -15,6 +17,9 @@ export interface BlogPost {
   content?: string;
   contentType?: string;
   imageKey?: string;
+  status?: 'draft' | 'published';
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface BlogCardData {
@@ -95,4 +100,65 @@ export async function fetchAbout(): Promise<AboutData> {
       content: ''
     };
   }
+}
+
+/**
+ * Fetch all blog posts for admin management (requires authentication)
+ */
+export async function fetchAdminPosts(): Promise<BlogPost[]> {
+  try {
+    const authHeader = await getAuthHeader();
+    if (!authHeader) {
+      throw new Error('Not authenticated');
+    }
+
+    const response = await fetch(`${API_BASE_URL}/admin/blogs`, {
+      headers: {
+        'Authorization': authHeader,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.posts || [];
+  } catch (error) {
+    console.error('Error fetching admin posts:', error);
+    throw error;
+  }
+}
+
+/**
+ * Update an existing blog post (requires authentication)
+ */
+export async function updateBlogPost(slug: string, data: {
+  title: string;
+  author: string;
+  summary: string;
+  content: string;
+  tags: string[];
+  status: 'draft' | 'published';
+}): Promise<{ slug: string; status: string; updatedAt: string }> {
+  const authHeader = await getAuthHeader();
+  if (!authHeader) {
+    throw new Error('Not authenticated');
+  }
+
+  const response = await fetch(`${API_BASE_URL}/blogs/${slug}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': authHeader,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Failed to update blog post');
+  }
+
+  return await response.json();
 }

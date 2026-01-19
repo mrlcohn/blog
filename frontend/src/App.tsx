@@ -6,6 +6,7 @@ import BlogPostPage from './pages/BlogPostPage';
 import AboutPage from './pages/AboutPage';
 import LoginPage from './pages/LoginPage';
 import CreatePostPage from './pages/CreatePostPage';
+import ManagePostsPage from './pages/ManagePostsPage';
 
 const theme = createTheme({
   palette: {
@@ -46,6 +47,8 @@ function App() {
           <Route path="/about" element={<AboutPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/create" element={<CreatePostPage />} />
+          <Route path="/edit/:slug" element={<CreatePostPage />} />
+          <Route path="/manage" element={<ManagePostsPage />} />
         </Routes>
       </Router>
     </ThemeProvider>

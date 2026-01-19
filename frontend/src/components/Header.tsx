@@ -30,7 +30,7 @@ function Header() {
     <AppBar
       position="sticky"
       sx={{
-        backgroundColor: 'rgba(74, 123, 167, 0.15)',
+        backgroundColor: 'rgb(211, 223, 235)',
         boxShadow: 1,
         zIndex: 1100, // Ensure header appears over other content
       }}
@@ -62,16 +62,28 @@ function Header() {
           </Button>
 
           {authenticated && (
-            <Button
-              color="inherit"
-              onClick={() => navigate('/create')}
-              sx={{
-                color: location.pathname === '/create' ? 'primary.main' : 'text.primary',
-                fontWeight: location.pathname === '/create' ? 600 : 400,
-              }}
-            >
-              Create
-            </Button>
+            <>
+              <Button
+                color="inherit"
+                onClick={() => navigate('/manage')}
+                sx={{
+                  color: location.pathname === '/manage' ? 'primary.main' : 'text.primary',
+                  fontWeight: location.pathname === '/manage' ? 600 : 400,
+                }}
+              >
+                Manage
+              </Button>
+              <Button
+                color="inherit"
+                onClick={() => navigate('/create')}
+                sx={{
+                  color: location.pathname === '/create' ? 'primary.main' : 'text.primary',
+                  fontWeight: location.pathname === '/create' ? 600 : 400,
+                }}
+              >
+                Create
+              </Button>
+            </>
           )}
         </Box>
 

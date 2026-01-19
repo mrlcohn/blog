@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import {
   Container,
   Paper,
@@ -17,6 +17,7 @@ import {
   CircularProgress,
 } from '@mui/material';
 import { isAuthenticated, getAuthHeader } from '../utils/auth';
+import { fetchAdminPosts, updateBlogPost, BlogPost } from '../services/api';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -30,13 +31,25 @@ interface BlogFormData {
   status: 'draft' | 'published';
 }
 
+const generateSlugFromTitle = (title: string): string => {
+  return title
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, '') // Remove punctuation (keep letters, numbers, spaces, hyphens)
+    .replace(/\s+/g, '-') // Replace spaces with hyphens
+    .replace(/-+/g, '-') // Collapse multiple hyphens
+    .replace(/^-|-$/g, ''); // Trim leading/trailing hyphens
+};
+
 const CreatePostPage = () => {
   const navigate = useNavigate();
+  const { slug: editSlug } = useParams<{ slug: string }>();
+  const isEditMode = Boolean(editSlug);
+
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [tagInput, setTagInput] = useState('');;
+  const [tagInput, setTagInput] = useState('');
 
   const [formData, setFormData] = useState<BlogFormData>({
     slug: '',
@@ -49,20 +62,50 @@ const CreatePostPage = () => {
   });
 
   useEffect(() => {
-    // Check authentication status and redirect if not authenticated
-    const checkAuth = async () => {
+    const init = async () => {
       setLoading(true);
       const authed = await isAuthenticated();
       if (!authed) {
         navigate('/login');
+        return;
       }
+
+      if (isEditMode && editSlug) {
+        try {
+          const posts = await fetchAdminPosts();
+          const post = posts.find((p: BlogPost) => p.slug === editSlug);
+          if (post) {
+            setFormData({
+              slug: post.slug,
+              title: post.title,
+              author: post.author,
+              summary: post.summary,
+              content: post.content || '',
+              tags: post.tags,
+              status: post.status || 'draft',
+            });
+          } else {
+            setError('Post not found');
+          }
+        } catch (err) {
+          setError(err instanceof Error ? err.message : 'Failed to load post');
+        }
+      }
+
       setLoading(false);
     };
-    checkAuth();
-  }, [navigate]);
+    init();
+  }, [navigate, isEditMode, editSlug]);
 
   const handleInputChange = (field: keyof BlogFormData, value: string | string[]) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData(prev => {
+      const updated = { ...prev, [field]: value };
+      // Auto-generate slug when title changes (only in create mode)
+      if (field === 'title' && !isEditMode) {
+        updated.slug = generateSlugFromTitle(value as string);
+      }
+      return updated;
+    });
   };
 
   const handleAddTag = () => {
@@ -82,16 +125,6 @@ const CreatePostPage = () => {
     }));
   };
 
-  const generateSlug = () => {
-    const slug = formData.title
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
-      .trim();
-    setFormData(prev => ({ ...prev, slug }));
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -104,37 +137,51 @@ const CreatePostPage = () => {
         throw new Error('Not authenticated');
       }
 
-      const response = await fetch(`${API_URL}/blogs`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': authHeader,
-        },
-        body: JSON.stringify(formData),
-      });
+      if (isEditMode && editSlug) {
+        // Update existing post
+        const result = await updateBlogPost(editSlug, {
+          title: formData.title,
+          author: formData.author,
+          summary: formData.summary,
+          content: formData.content,
+          tags: formData.tags,
+          status: formData.status,
+        });
+        setSuccess(`Blog post "${formData.title}" updated successfully as ${result.status}!`);
+      } else {
+        // Create new post
+        const response = await fetch(`${API_URL}/blogs`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': authHeader,
+          },
+          body: JSON.stringify(formData),
+        });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to create blog post');
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to create blog post');
+        }
+
+        const result = await response.json();
+        setSuccess(`Blog post "${formData.title}" created successfully as ${result.status}!`);
+
+        // Reset form
+        setFormData({
+          slug: '',
+          title: '',
+          author: '',
+          summary: '',
+          content: '',
+          tags: [],
+          status: 'draft',
+        });
       }
 
-      const result = await response.json();
-      setSuccess(`Blog post "${formData.title}" created successfully as ${result.status}!`);
-
-      // Reset form
-      setFormData({
-        slug: '',
-        title: '',
-        author: '',
-        summary: '',
-        content: '',
-        tags: [],
-        status: 'draft',
-      });
-
-      // Redirect to home after a delay
+      // Redirect to manage posts after a delay
       setTimeout(() => {
-        navigate('/');
+        navigate('/manage');
       }, 2000);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -155,7 +202,7 @@ const CreatePostPage = () => {
     <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h3" component="h1">
-          Create New Blog Post
+          {isEditMode ? 'Edit Blog Post' : 'Create New Blog Post'}
         </Typography>
       </Box>
 
@@ -180,22 +227,14 @@ const CreatePostPage = () => {
               fullWidth
               value={formData.title}
               onChange={(e) => handleInputChange('title', e.target.value)}
-              onBlur={generateSlug}
+              helperText={!isEditMode && formData.slug ? `Slug: ${formData.slug}` : undefined}
             />
 
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <TextField
-                label="Slug"
-                required
-                fullWidth
-                value={formData.slug}
-                onChange={(e) => handleInputChange('slug', e.target.value)}
-                helperText="URL-friendly identifier (e.g., my-blog-post)"
-              />
-              <Button variant="outlined" onClick={generateSlug}>
-                Generate
-              </Button>
-            </Box>
+            {isEditMode && (
+              <Typography variant="body2" color="text.secondary">
+                Slug: {formData.slug} (cannot be changed)
+              </Typography>
+            )}
 
             <TextField
               label="Author"
@@ -234,7 +273,7 @@ const CreatePostPage = () => {
                   fullWidth
                   value={tagInput}
                   onChange={(e) => setTagInput(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTag())}
+                  onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTag())}
                 />
                 <Button variant="outlined" onClick={handleAddTag}>
                   Add
@@ -269,7 +308,10 @@ const CreatePostPage = () => {
               size="large"
               disabled={submitting}
             >
-              {submitting ? 'Creating...' : 'Create Blog Post'}
+              {submitting
+                ? (isEditMode ? 'Updating...' : 'Creating...')
+                : (isEditMode ? 'Update Blog Post' : 'Create Blog Post')
+              }
             </Button>
           </Stack>
         </form>

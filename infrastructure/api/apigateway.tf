@@ -189,5 +189,53 @@ resource "aws_lambda_permission" "api_gw_create_blog_post" {
   source_arn    = "${aws_apigatewayv2_api.blog_api.execution_arn}/*/*"
 }
 
+# Lambda Integration: GetAdminPosts (Protected)
+resource "aws_apigatewayv2_integration" "get_admin_posts" {
+  api_id           = aws_apigatewayv2_api.blog_api.id
+  integration_type = "AWS_PROXY"
+  integration_uri  = aws_lambda_function.get_admin_posts.invoke_arn
+  payload_format_version = "2.0"
+}
+
+resource "aws_apigatewayv2_route" "get_admin_posts" {
+  api_id             = aws_apigatewayv2_api.blog_api.id
+  route_key          = "GET /admin/blogs"
+  target             = "integrations/${aws_apigatewayv2_integration.get_admin_posts.id}"
+  authorizer_id      = aws_apigatewayv2_authorizer.cognito_authorizer.id
+  authorization_type = "CUSTOM"
+}
+
+resource "aws_lambda_permission" "api_gw_get_admin_posts" {
+  statement_id  = "AllowAPIGatewayInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.get_admin_posts.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_apigatewayv2_api.blog_api.execution_arn}/*/*"
+}
+
+# Lambda Integration: UpdateBlogPost (Protected)
+resource "aws_apigatewayv2_integration" "update_blog_post" {
+  api_id           = aws_apigatewayv2_api.blog_api.id
+  integration_type = "AWS_PROXY"
+  integration_uri  = aws_lambda_function.update_blog_post.invoke_arn
+  payload_format_version = "2.0"
+}
+
+resource "aws_apigatewayv2_route" "update_blog_post" {
+  api_id             = aws_apigatewayv2_api.blog_api.id
+  route_key          = "PUT /blogs/{slug}"
+  target             = "integrations/${aws_apigatewayv2_integration.update_blog_post.id}"
+  authorizer_id      = aws_apigatewayv2_authorizer.cognito_authorizer.id
+  authorization_type = "CUSTOM"
+}
+
+resource "aws_lambda_permission" "api_gw_update_blog_post" {
+  statement_id  = "AllowAPIGatewayInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.update_blog_post.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_apigatewayv2_api.blog_api.execution_arn}/*/*"
+}
+
 # Custom domain for API (api.yourdomain.com or yourdomain.com/api)
 # We'll add this to CloudFront as a behavior instead

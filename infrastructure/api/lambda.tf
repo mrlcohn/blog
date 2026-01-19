@@ -149,3 +149,59 @@ resource "aws_lambda_function" "create_blog_post" {
     Name = "CreateBlogPost Lambda"
   }
 }
+
+# Lambda function: GetAdminPosts
+data "archive_file" "get_admin_posts" {
+  type        = "zip"
+  source_dir  = "${path.module}/../../api/lambdas/get_admin_posts"
+  output_path = "${path.module}/lambda_zips/get_admin_posts.zip"
+}
+
+resource "aws_lambda_function" "get_admin_posts" {
+  filename         = data.archive_file.get_admin_posts.output_path
+  function_name    = "GetAdminPosts"
+  role            = aws_iam_role.lambda_exec.arn
+  handler         = "lambda_function.lambda_handler"
+  source_code_hash = data.archive_file.get_admin_posts.output_base64sha256
+  runtime         = "python3.12"
+  timeout         = 10
+
+  environment {
+    variables = {
+      DYNAMODB_TABLE = aws_dynamodb_table.blog_posts.name
+      S3_BUCKET      = aws_s3_bucket.api_content.bucket
+    }
+  }
+
+  tags = {
+    Name = "GetAdminPosts Lambda"
+  }
+}
+
+# Lambda function: UpdateBlogPost
+data "archive_file" "update_blog_post" {
+  type        = "zip"
+  source_dir  = "${path.module}/../../api/lambdas/update_blog_post"
+  output_path = "${path.module}/lambda_zips/update_blog_post.zip"
+}
+
+resource "aws_lambda_function" "update_blog_post" {
+  filename         = data.archive_file.update_blog_post.output_path
+  function_name    = "UpdateBlogPost"
+  role            = aws_iam_role.lambda_exec.arn
+  handler         = "lambda_function.lambda_handler"
+  source_code_hash = data.archive_file.update_blog_post.output_base64sha256
+  runtime         = "python3.12"
+  timeout         = 10
+
+  environment {
+    variables = {
+      DYNAMODB_TABLE = aws_dynamodb_table.blog_posts.name
+      S3_BUCKET      = aws_s3_bucket.api_content.bucket
+    }
+  }
+
+  tags = {
+    Name = "UpdateBlogPost Lambda"
+  }
+}
