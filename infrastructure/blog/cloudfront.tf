@@ -50,7 +50,7 @@ resource "aws_cloudfront_distribution" "blog" {
 
   # API content S3 bucket as origin for /content/* requests (images, etc.)
   dynamic "origin" {
-    for_each = var.api_content_bucket_name != "" ? [1] : 0
+    for_each = var.api_content_bucket_name != "" ? [1] : []
     content {
       domain_name              = var.api_content_bucket_regional_domain_name
       origin_id                = "S3-APIContent"
