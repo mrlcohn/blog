@@ -90,7 +90,7 @@ resource "aws_apigatewayv2_integration" "get_blog_cards" {
 
 resource "aws_apigatewayv2_route" "get_blog_cards" {
   api_id    = aws_apigatewayv2_api.blog_api.id
-  route_key = "GET /blogs"
+  route_key = "GET /api/blogs"
   target    = "integrations/${aws_apigatewayv2_integration.get_blog_cards.id}"
 }
 
@@ -112,7 +112,7 @@ resource "aws_apigatewayv2_integration" "get_blog" {
 
 resource "aws_apigatewayv2_route" "get_blog" {
   api_id    = aws_apigatewayv2_api.blog_api.id
-  route_key = "GET /blog/{slug}"
+  route_key = "GET /api/blog/{slug}"
   target    = "integrations/${aws_apigatewayv2_integration.get_blog.id}"
 }
 
@@ -134,7 +134,7 @@ resource "aws_apigatewayv2_integration" "get_about" {
 
 resource "aws_apigatewayv2_route" "get_about" {
   api_id    = aws_apigatewayv2_api.blog_api.id
-  route_key = "GET /about"
+  route_key = "GET /api/about"
   target    = "integrations/${aws_apigatewayv2_integration.get_about.id}"
 }
 
@@ -175,7 +175,7 @@ resource "aws_apigatewayv2_integration" "create_blog_post" {
 
 resource "aws_apigatewayv2_route" "create_blog_post" {
   api_id             = aws_apigatewayv2_api.blog_api.id
-  route_key          = "POST /blogs"
+  route_key          = "POST /api/blogs"
   target             = "integrations/${aws_apigatewayv2_integration.create_blog_post.id}"
   authorizer_id      = aws_apigatewayv2_authorizer.cognito_authorizer.id
   authorization_type = "CUSTOM"
@@ -199,7 +199,7 @@ resource "aws_apigatewayv2_integration" "get_admin_posts" {
 
 resource "aws_apigatewayv2_route" "get_admin_posts" {
   api_id             = aws_apigatewayv2_api.blog_api.id
-  route_key          = "GET /admin/blogs"
+  route_key          = "GET /api/admin/blogs"
   target             = "integrations/${aws_apigatewayv2_integration.get_admin_posts.id}"
   authorizer_id      = aws_apigatewayv2_authorizer.cognito_authorizer.id
   authorization_type = "CUSTOM"
@@ -223,7 +223,7 @@ resource "aws_apigatewayv2_integration" "update_blog_post" {
 
 resource "aws_apigatewayv2_route" "update_blog_post" {
   api_id             = aws_apigatewayv2_api.blog_api.id
-  route_key          = "PUT /blogs/{slug}"
+  route_key          = "PUT /api/blogs/{slug}"
   target             = "integrations/${aws_apigatewayv2_integration.update_blog_post.id}"
   authorizer_id      = aws_apigatewayv2_authorizer.cognito_authorizer.id
   authorization_type = "CUSTOM"
@@ -247,7 +247,7 @@ resource "aws_apigatewayv2_integration" "update_about" {
 
 resource "aws_apigatewayv2_route" "update_about" {
   api_id             = aws_apigatewayv2_api.blog_api.id
-  route_key          = "PUT /about"
+  route_key          = "PUT /api/about"
   target             = "integrations/${aws_apigatewayv2_integration.update_about.id}"
   authorizer_id      = aws_apigatewayv2_authorizer.cognito_authorizer.id
   authorization_type = "CUSTOM"
@@ -271,7 +271,7 @@ resource "aws_apigatewayv2_integration" "upload_image" {
 
 resource "aws_apigatewayv2_route" "upload_image" {
   api_id             = aws_apigatewayv2_api.blog_api.id
-  route_key          = "POST /upload"
+  route_key          = "POST /api/upload"
   target             = "integrations/${aws_apigatewayv2_integration.upload_image.id}"
   authorizer_id      = aws_apigatewayv2_authorizer.cognito_authorizer.id
   authorization_type = "CUSTOM"

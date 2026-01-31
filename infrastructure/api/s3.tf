@@ -37,6 +37,19 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "api_content" {
   }
 }
 
+# CORS configuration for direct browser uploads via presigned URLs
+resource "aws_s3_bucket_cors_configuration" "api_content" {
+  bucket = aws_s3_bucket.api_content.id
+
+  cors_rule {
+    allowed_headers = ["*"]
+    allowed_methods = ["PUT"]
+    allowed_origins = ["https://${var.domain_name}"]
+    expose_headers  = ["ETag"]
+    max_age_seconds = 3000
+  }
+}
+
 # Bucket policy to allow CloudFront OAC access for /content/* path
 resource "aws_s3_bucket_policy" "api_content" {
   count  = var.cloudfront_distribution_arn != "" ? 1 : 0

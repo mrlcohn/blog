@@ -4,6 +4,7 @@ Returns about me information from S3.
 """
 import json
 import boto3
+from botocore.exceptions import ClientError
 import os
 
 s3 = boto3.client('s3')
@@ -21,14 +22,17 @@ def lambda_handler(event, context):
         try:
             s3_response = s3.get_object(Bucket=bucket_name, Key=ABOUT_KEY)
             about_data = json.loads(s3_response['Body'].read().decode('utf-8'))
-        except s3.exceptions.NoSuchKey:
-            # Return default if file doesn't exist yet
-            about_data = {
-                'name': '',
-                'bio': '',
-                'social': {},
-                'content': ''
-            }
+        except ClientError as e:
+            if e.response['Error']['Code'] == 'NoSuchKey':
+                # Return default if file doesn't exist yet
+                about_data = {
+                    'name': '',
+                    'bio': '',
+                    'social': {},
+                    'content': ''
+                }
+            else:
+                raise
 
         return {
             'statusCode': 200,
