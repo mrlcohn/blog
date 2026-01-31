@@ -30,7 +30,8 @@ def lambda_handler(event, context):
     """
     try:
         # Get user info from authorizer context (for logging)
-        authorizer_context = event.get('requestContext', {}).get('authorizer', {})
+        # For HTTP API with Lambda authorizer, context is under 'lambda' key
+        authorizer_context = event.get('requestContext', {}).get('authorizer', {}).get('lambda', {})
         user_email = authorizer_context.get('email', 'unknown')
         print(f"Admin posts requested by: {user_email}")
 

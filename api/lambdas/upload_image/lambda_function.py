@@ -44,9 +44,11 @@ def lambda_handler(event, context):
     """
     try:
         # Get user info from authorizer context
-        authorizer_context = event.get('requestContext', {}).get('authorizer', {})
+        # For HTTP API with Lambda authorizer, context is under 'lambda' key
+        authorizer_context = event.get('requestContext', {}).get('authorizer', {}).get('lambda', {})
         user_email = authorizer_context.get('email', 'unknown')
 
+        print(f"Event: {json.dumps(event)}")
         print(f"Upload request from user: {user_email}")
 
         # Parse request body
