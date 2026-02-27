@@ -235,6 +235,15 @@ resource "aws_lambda_function" "update_blog_post" {
 }
 
 # Lambda function: UpdateAbout
+resource "aws_cloudwatch_log_group" "update_about" {
+  name              = "/aws/lambda/UpdateAbout"
+  retention_in_days = 7
+
+  tags = {
+    Name = "UpdateAbout Lambda Logs"
+  }
+}
+
 data "archive_file" "update_about" {
   type        = "zip"
   source_dir  = "${path.module}/../../api/lambdas/update_about"
@@ -263,6 +272,8 @@ resource "aws_lambda_function" "update_about" {
   tags = {
     Name = "UpdateAbout Lambda"
   }
+
+  depends_on = [aws_cloudwatch_log_group.update_about]
 }
 
 # Lambda function: UploadImage

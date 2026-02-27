@@ -101,6 +101,17 @@ jobs:
             -backend-config="region=${{ env.AWS_REGION }}" \
             -backend-config="dynamodb_table=${{ env.TF_LOCK_TABLE }}"
 
+      - name: Install Lambda dependencies
+        if: matrix.module == 'api'
+        run: |
+          pip install \
+            --platform manylinux2014_x86_64 \
+            --implementation cp \
+            --python-version 3.12 \
+            --only-binary=:all: \
+            --target ../../api/lambdas/authorizer/ \
+            -r ../../api/lambdas/authorizer/requirements.txt
+
       - name: Terraform Format Check
         run: terraform fmt -check
         continue-on-error: true
