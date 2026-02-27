@@ -6,11 +6,34 @@ import json
 import boto3
 import os
 import uuid
+import logging
+import traceback
+import base64
 from datetime import datetime
 
+# Configure structured JSON logging
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
 s3 = boto3.client('s3')
-bucket_name = os.environ['S3_BUCKET']
+bucket_name = os.environ.get('S3_BUCKET', '')
 domain_name = os.environ.get('DOMAIN_NAME', '')
+
+
+def log_structured(level, message, **kwargs):
+    """Helper for structured JSON logging"""
+    log_entry = {
+        'message': message,
+        'function': 'UploadImage',
+        'timestamp': datetime.utcnow().isoformat() + 'Z',
+        **kwargs
+    }
+    if level == 'error':
+        logger.error(json.dumps(log_entry))
+    elif level == 'warning':
+        logger.warning(json.dumps(log_entry))
+    else:
+        logger.info(json.dumps(log_entry))
 
 # Allowed image content types
 ALLOWED_CONTENT_TYPES = {
@@ -42,23 +65,53 @@ def lambda_handler(event, context):
         "key": "content/..."         # S3 key for reference
     }
     """
+    request_id = context.aws_request_id if context else 'unknown'
+
     try:
+        # Log incoming event for debugging
+        log_structured('info', 'Request received',
+            request_id=request_id,
+            http_method=event.get('requestContext', {}).get('http', {}).get('method'),
+            path=event.get('requestContext', {}).get('http', {}).get('path'),
+            has_body=bool(event.get('body')),
+            is_base64=event.get('isBase64Encoded', False),
+            bucket=bucket_name
+        )
+
         # Get user info from authorizer context
         # For HTTP API with Lambda authorizer, context is under 'lambda' key
         authorizer_context = event.get('requestContext', {}).get('authorizer', {}).get('lambda', {})
         user_email = authorizer_context.get('email', 'unknown')
 
-        print(f"Event: {json.dumps(event)}")
-        print(f"Upload request from user: {user_email}")
+        log_structured('info', 'Authorizer context',
+            request_id=request_id,
+            user_email=user_email,
+            authorizer_keys=list(event.get('requestContext', {}).get('authorizer', {}).keys())
+        )
 
-        # Parse request body
-        body = json.loads(event.get('body', '{}'))
+        # Parse request body (handle base64 encoding if present)
+        body_str = event.get('body', '{}')
+        if event.get('isBase64Encoded', False):
+            log_structured('info', 'Decoding base64 body', request_id=request_id)
+            body_str = base64.b64decode(body_str).decode('utf-8')
+
+        body = json.loads(body_str)
 
         content_type = body.get('contentType', '').lower()
         category = body.get('category', 'about')
 
+        log_structured('info', 'Parsed request',
+            request_id=request_id,
+            content_type=content_type,
+            category=category
+        )
+
         # Validate content type
         if content_type not in ALLOWED_CONTENT_TYPES:
+            log_structured('warning', 'Invalid content type',
+                request_id=request_id,
+                content_type=content_type
+            )
             return {
                 'statusCode': 400,
                 'headers': {
@@ -72,6 +125,10 @@ def lambda_handler(event, context):
 
         # Validate category
         if category not in ['about', 'posts']:
+            log_structured('warning', 'Invalid category',
+                request_id=request_id,
+                category=category
+            )
             return {
                 'statusCode': 400,
                 'headers': {
@@ -93,6 +150,13 @@ def lambda_handler(event, context):
         # This maps to CloudFront /content/{category}/{filename}
         s3_key = f"content/{category}/{filename}"
 
+        log_structured('info', 'Generating presigned URL',
+            request_id=request_id,
+            bucket=bucket_name,
+            key=s3_key,
+            content_type=content_type
+        )
+
         # Generate pre-signed URL for PUT upload
         upload_url = s3.generate_presigned_url(
             'put_object',
@@ -107,7 +171,11 @@ def lambda_handler(event, context):
         # The public URL will be served via CloudFront
         image_url = f"/content/{category}/{filename}"
 
-        print(f"Generated upload URL for key: {s3_key}")
+        log_structured('info', 'Successfully generated upload URL',
+            request_id=request_id,
+            s3_key=s3_key,
+            image_url=image_url
+        )
 
         return {
             'statusCode': 200,
@@ -123,7 +191,12 @@ def lambda_handler(event, context):
             })
         }
 
-    except json.JSONDecodeError:
+    except json.JSONDecodeError as e:
+        log_structured('error', 'JSON decode error',
+            request_id=request_id,
+            error=str(e),
+            error_type='JSONDecodeError'
+        )
         return {
             'statusCode': 400,
             'headers': {
@@ -131,11 +204,17 @@ def lambda_handler(event, context):
                 'Access-Control-Allow-Origin': '*',
             },
             'body': json.dumps({
-                'error': 'Invalid JSON in request body'
+                'error': 'Invalid JSON in request body',
+                'details': str(e)
             })
         }
     except Exception as e:
-        print(f"Error generating upload URL: {str(e)}")
+        log_structured('error', 'Unhandled exception',
+            request_id=request_id,
+            error=str(e),
+            error_type=type(e).__name__,
+            traceback=traceback.format_exc()
+        )
         return {
             'statusCode': 500,
             'headers': {
@@ -144,6 +223,7 @@ def lambda_handler(event, context):
             },
             'body': json.dumps({
                 'error': 'Internal server error',
-                'message': str(e)
+                'message': str(e),
+                'request_id': request_id
             })
         }

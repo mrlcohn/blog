@@ -14,6 +14,10 @@ resource "aws_lambda_function" "get_blog_cards" {
   runtime         = "python3.12"
   timeout         = 10
 
+  tracing_config {
+    mode = "Active"
+  }
+
   environment {
     variables = {
       DYNAMODB_TABLE = aws_dynamodb_table.blog_posts.name
@@ -42,6 +46,10 @@ resource "aws_lambda_function" "get_blog" {
   runtime         = "python3.12"
   timeout         = 10
 
+  tracing_config {
+    mode = "Active"
+  }
+
   environment {
     variables = {
       DYNAMODB_TABLE = aws_dynamodb_table.blog_posts.name
@@ -69,6 +77,10 @@ resource "aws_lambda_function" "get_about" {
   source_code_hash = data.archive_file.get_about.output_base64sha256
   runtime         = "python3.12"
   timeout         = 10
+
+  tracing_config {
+    mode = "Active"
+  }
 
   environment {
     variables = {
@@ -110,6 +122,10 @@ resource "aws_lambda_function" "authorizer" {
   runtime         = "python3.12"
   timeout         = 10
 
+  tracing_config {
+    mode = "Active"
+  }
+
   environment {
     variables = {
       USER_POOL_ID  = aws_cognito_user_pool.blog_admin.id
@@ -137,6 +153,10 @@ resource "aws_lambda_function" "create_blog_post" {
   source_code_hash = data.archive_file.create_blog_post.output_base64sha256
   runtime         = "python3.12"
   timeout         = 10
+
+  tracing_config {
+    mode = "Active"
+  }
 
   environment {
     variables = {
@@ -166,6 +186,10 @@ resource "aws_lambda_function" "get_admin_posts" {
   runtime         = "python3.12"
   timeout         = 10
 
+  tracing_config {
+    mode = "Active"
+  }
+
   environment {
     variables = {
       DYNAMODB_TABLE = aws_dynamodb_table.blog_posts.name
@@ -193,6 +217,10 @@ resource "aws_lambda_function" "update_blog_post" {
   source_code_hash = data.archive_file.update_blog_post.output_base64sha256
   runtime         = "python3.12"
   timeout         = 10
+
+  tracing_config {
+    mode = "Active"
+  }
 
   environment {
     variables = {
@@ -222,6 +250,10 @@ resource "aws_lambda_function" "update_about" {
   runtime         = "python3.12"
   timeout         = 10
 
+  tracing_config {
+    mode = "Active"
+  }
+
   environment {
     variables = {
       S3_BUCKET = aws_s3_bucket.api_content.bucket
@@ -248,6 +280,10 @@ resource "aws_lambda_function" "upload_image" {
   source_code_hash = data.archive_file.upload_image.output_base64sha256
   runtime         = "python3.12"
   timeout         = 10
+
+  tracing_config {
+    mode = "Active"
+  }
 
   environment {
     variables = {
