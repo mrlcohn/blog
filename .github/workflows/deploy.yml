@@ -78,12 +78,20 @@ jobs:
       - name: Create terraform.tfvars
         run: |
           if [ "${{ matrix.module }}" = "blog" ]; then
+            # Read API module outputs from Terraform state to get content bucket details
+            aws s3 cp s3://${{ env.TF_STATE_BUCKET }}/blog/api.tfstate /tmp/api.tfstate
+            API_BUCKET_NAME=$(jq -r '.outputs.api_bucket_name.value' /tmp/api.tfstate)
+            API_BUCKET_ARN=$(jq -r '.outputs.api_bucket_arn.value' /tmp/api.tfstate)
+            API_BUCKET_DOMAIN=$(jq -r '.outputs.api_bucket_regional_domain_name.value' /tmp/api.tfstate)
             cat > terraform.tfvars <<EOF
-          aws_region            = "${{ env.AWS_REGION }}"
-          blog_bucket_name      = "${{ vars.BLOG_BUCKET_NAME }}"
-          domain_name           = "${{ vars.DOMAIN_NAME }}"
-          route53_zone_name     = "${{ vars.ROUTE53_ZONE_NAME }}"
-          api_gateway_endpoint  = "${{ vars.API_GATEWAY_ENDPOINT }}"
+          aws_region                              = "${{ env.AWS_REGION }}"
+          blog_bucket_name                        = "${{ vars.BLOG_BUCKET_NAME }}"
+          domain_name                             = "${{ vars.DOMAIN_NAME }}"
+          route53_zone_name                       = "${{ vars.ROUTE53_ZONE_NAME }}"
+          api_gateway_endpoint                    = "${{ vars.API_GATEWAY_ENDPOINT }}"
+          api_content_bucket_name                 = "${API_BUCKET_NAME}"
+          api_content_bucket_arn                  = "${API_BUCKET_ARN}"
+          api_content_bucket_regional_domain_name = "${API_BUCKET_DOMAIN}"
           EOF
           else
             ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
