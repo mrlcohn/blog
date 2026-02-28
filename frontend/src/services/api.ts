@@ -160,8 +160,10 @@ export async function updateBlogPost(slug: string, data: {
   });
 
   if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || 'Failed to update blog post');
+    const text = await response.text();
+    let message = 'Failed to update blog post';
+    try { message = JSON.parse(text).error || message; } catch { /* non-JSON error */ }
+    throw new Error(message);
   }
 
   return await response.json();
@@ -191,8 +193,10 @@ export async function updateAbout(data: {
   });
 
   if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || 'Failed to update about page');
+    const text = await response.text();
+    let message = 'Failed to update about page';
+    try { message = JSON.parse(text).error || message; } catch { /* non-JSON error */ }
+    throw new Error(message);
   }
 
   return await response.json();
@@ -221,8 +225,15 @@ export async function getUploadUrl(contentType: string, category: 'about' | 'pos
   });
 
   if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || 'Failed to get upload URL');
+    const text = await response.text();
+    let message = 'Failed to get upload URL';
+    try {
+      const errorData = JSON.parse(text);
+      message = errorData.error || message;
+    } catch {
+      message = `Upload URL request failed (${response.status})`;
+    }
+    throw new Error(message);
   }
 
   return await response.json();
@@ -245,7 +256,11 @@ export async function uploadImage(file: File, category: 'about' | 'posts' = 'abo
   });
 
   if (!uploadResponse.ok) {
-    throw new Error('Failed to upload image');
+    const errorText = await uploadResponse.text();
+    // S3 returns XML errors - extract the code for a meaningful message
+    const codeMatch = errorText.match(/<Code>(.+?)<\/Code>/);
+    const s3Code = codeMatch ? codeMatch[1] : uploadResponse.status;
+    throw new Error(`Failed to upload image: ${s3Code}`);
   }
 
   // Return the public URL (served via CloudFront)

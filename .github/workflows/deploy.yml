@@ -86,11 +86,14 @@ jobs:
           api_gateway_endpoint  = "${{ vars.API_GATEWAY_ENDPOINT }}"
           EOF
           else
+            ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+            CF_ARN="arn:aws:cloudfront::${ACCOUNT_ID}:distribution/${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}"
             cat > terraform.tfvars <<EOF
-          aws_region         = "${{ env.AWS_REGION }}"
-          api_bucket_name    = "${{ vars.API_BUCKET_NAME }}"
-          domain_name        = "${{ vars.DOMAIN_NAME }}"
-          route53_zone_name  = "${{ vars.ROUTE53_ZONE_NAME }}"
+          aws_region                   = "${{ env.AWS_REGION }}"
+          api_bucket_name              = "${{ vars.API_BUCKET_NAME }}"
+          domain_name                  = "${{ vars.DOMAIN_NAME }}"
+          route53_zone_name            = "${{ vars.ROUTE53_ZONE_NAME }}"
+          cloudfront_distribution_arn  = "${CF_ARN}"
           EOF
           fi
 
