@@ -13,12 +13,14 @@ table = dynamodb.Table(os.environ['DYNAMODB_TABLE'])
 bucket_name = os.environ['S3_BUCKET']
 
 
-class DecimalEncoder(json.JSONEncoder):
-    """Helper class to convert Decimal to int/float for JSON serialization"""
+class DynamoDBEncoder(json.JSONEncoder):
+    """Helper class to convert DynamoDB types for JSON serialization"""
     def default(self, obj):
         if isinstance(obj, Decimal):
             return int(obj) if obj % 1 == 0 else float(obj)
-        return super(DecimalEncoder, self).default(obj)
+        if isinstance(obj, (set, frozenset)):
+            return list(obj)
+        return super(DynamoDBEncoder, self).default(obj)
 
 
 def lambda_handler(event, context):
@@ -97,7 +99,7 @@ def lambda_handler(event, context):
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Methods': 'GET,OPTIONS',
             },
-            'body': json.dumps(post, cls=DecimalEncoder)
+            'body': json.dumps(post, cls=DynamoDBEncoder)
         }
 
     except Exception as e:

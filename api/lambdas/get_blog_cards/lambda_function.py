@@ -11,12 +11,14 @@ dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table(os.environ['DYNAMODB_TABLE'])
 
 
-class DecimalEncoder(json.JSONEncoder):
-    """Helper class to convert Decimal to int/float for JSON serialization"""
+class DynamoDBEncoder(json.JSONEncoder):
+    """Helper class to convert DynamoDB types for JSON serialization"""
     def default(self, obj):
         if isinstance(obj, Decimal):
             return int(obj) if obj % 1 == 0 else float(obj)
-        return super(DecimalEncoder, self).default(obj)
+        if isinstance(obj, (set, frozenset)):
+            return list(obj)
+        return super(DynamoDBEncoder, self).default(obj)
 
 
 def lambda_handler(event, context):
@@ -60,7 +62,7 @@ def lambda_handler(event, context):
             'body': json.dumps({
                 'posts': posts,
                 'count': len(posts)
-            }, cls=DecimalEncoder)
+            }, cls=DynamoDBEncoder)
         }
 
     except Exception as e:

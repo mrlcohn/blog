@@ -53,8 +53,13 @@ export async function fetchBlogCards(): Promise<BlogCardData[]> {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    const data = await response.json();
-    return data.posts || [];
+    const text = await response.text();
+    try {
+      const data = JSON.parse(text);
+      return data.posts || [];
+    } catch {
+      throw new Error(`Blog cards returned ${response.status} but got non-JSON response starting with: "${text.substring(0, 80)}"`);
+    }
   } catch (error) {
     console.error('Error fetching blog cards:', error);
     return [];
