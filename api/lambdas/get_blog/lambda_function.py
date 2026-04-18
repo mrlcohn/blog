@@ -42,7 +42,7 @@ def lambda_handler(event, context):
         response = table.get_item(
             Key={
                 'PK': f'POST#{slug}',
-                'SK': 'v0'
+                'SK': 'METADATA'
             }
         )
 

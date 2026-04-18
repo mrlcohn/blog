@@ -208,7 +208,12 @@ export async function updateBlogPost(slug: string, data: {
     throw new Error(message);
   }
 
-  return await response.json();
+  const text = await response.text();
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new Error(`Update returned ${response.status} but got non-JSON response starting with: "${text.substring(0, 80)}"`);
+  }
 }
 
 /**
