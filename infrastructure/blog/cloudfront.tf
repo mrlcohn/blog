@@ -135,13 +135,6 @@ resource "aws_cloudfront_distribution" "blog" {
     error_caching_min_ttl = 0
   }
 
-  custom_error_response {
-    error_code            = 403
-    response_code         = 200
-    response_page_path    = "/index.html"
-    error_caching_min_ttl = 0
-  }
-
   # SSL/TLS certificate
   viewer_certificate {
     acm_certificate_arn      = aws_acm_certificate_validation.blog.certificate_arn
