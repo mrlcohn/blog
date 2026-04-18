@@ -33,10 +33,10 @@ function HomePage() {
         <Box sx={{ mb: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 6, flexWrap: 'wrap' }}>
           <Box sx={{ flex: 1, minWidth: '300px' }}>
             <Typography variant="h2" component="h1" gutterBottom>
-              My Blog
+              Cohn's Corner
             </Typography>
             <Typography variant="h6" component="p" color="text.secondary">
-              Thoughts on web development, AWS, and technology
+              Leveraging DevOps to improve delivery and communication
             </Typography>
           </Box>
 
