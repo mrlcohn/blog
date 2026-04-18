@@ -17,11 +17,9 @@ import {
   CircularProgress,
 } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import { isAuthenticated, getAuthHeader } from '../utils/auth';
-import { fetchAdminPosts, updateBlogPost, uploadImage } from '../services/api';
+import { isAuthenticated } from '../utils/auth';
+import { fetchAdminPosts, createBlogPost, updateBlogPost, uploadImage } from '../services/api';
 import type { BlogPost } from '../services/api';
-
-const API_URL = import.meta.env.VITE_API_URL || '';
 
 interface BlogFormData {
   slug: string;
@@ -178,11 +176,6 @@ const CreatePostPage = () => {
     setSubmitting(true);
 
     try {
-      const authHeader = await getAuthHeader();
-      if (!authHeader) {
-        throw new Error('Not authenticated');
-      }
-
       if (isEditMode && editSlug) {
         // Update existing post
         const result = await updateBlogPost(editSlug, {
@@ -197,24 +190,10 @@ const CreatePostPage = () => {
         setSuccess(`Blog post "${formData.title}" updated successfully as ${result.status}!`);
       } else {
         // Create new post
-        const response = await fetch(`${API_URL}/blogs`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': authHeader,
-          },
-          body: JSON.stringify({
-            ...formData,
-            imageKey: formData.imageKey || undefined,
-          }),
+        const result = await createBlogPost({
+          ...formData,
+          imageKey: formData.imageKey || undefined,
         });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Failed to create blog post');
-        }
-
-        const result = await response.json();
         setSuccess(`Blog post "${formData.title}" created successfully as ${result.status}!`);
 
         // Reset form

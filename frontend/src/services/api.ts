@@ -134,6 +134,43 @@ export async function fetchAdminPosts(): Promise<BlogPost[]> {
 }
 
 /**
+ * Create a new blog post (requires authentication)
+ */
+export async function createBlogPost(data: {
+  slug: string;
+  title: string;
+  author: string;
+  summary: string;
+  content: string;
+  tags: string[];
+  status: 'draft' | 'published';
+  imageKey?: string;
+}): Promise<{ slug: string; status: string; createdAt: string }> {
+  const authHeader = await getAuthHeader();
+  if (!authHeader) {
+    throw new Error('Not authenticated');
+  }
+
+  const response = await fetch(`${API_BASE_URL}/blogs`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': authHeader,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    let message = 'Failed to create blog post';
+    try { message = JSON.parse(text).error || message; } catch { /* non-JSON error */ }
+    throw new Error(message);
+  }
+
+  return await response.json();
+}
+
+/**
  * Update an existing blog post (requires authentication)
  */
 export async function updateBlogPost(slug: string, data: {
