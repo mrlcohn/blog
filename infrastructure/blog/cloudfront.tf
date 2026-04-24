@@ -127,7 +127,15 @@ resource "aws_cloudfront_distribution" "blog" {
     }
   }
 
-  # Custom error response for SPA routing
+  # Custom error responses for SPA routing
+  # S3 returns 403 (not 404) for missing objects in private buckets with OAC
+  custom_error_response {
+    error_code            = 403
+    response_code         = 200
+    response_page_path    = "/index.html"
+    error_caching_min_ttl = 0
+  }
+
   custom_error_response {
     error_code            = 404
     response_code         = 200
